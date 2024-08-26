@@ -9,56 +9,47 @@ import InvestmentPortfolio from '../components/InvestmentPortfolio';
 import SavingsGoals from '../components/SavingsGoals';
 import Budgets from '../components/Budgets';
 
-const useStyles = styled((theme) => ({
-  root: {
-    flexGrow: 1,
-  },
-  paper: {
-    padding: theme.spacing(3),
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-  },
-  title: {
-    marginBottom: theme.spacing(3),
-  },
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(3),
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100%',
 }));
 
 const Dashboard = () => {
-  const classes = useStyles();
   const { loading, error, data } = useQuery(GET_DASHBOARD_DATA);
 
   if (loading) return <CircularProgress />;
   if (error) return <Typography color="error">Error: {error.message}</Typography>;
 
   return (
-    <div className={classes.root}>
-      <Typography variant="h4" className={classes.title}>Dashboard</Typography>
+    <div>
+      <Typography variant="h4" gutterBottom>Dashboard</Typography>
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
-          <Paper className={classes.paper}>
+          <StyledPaper>
             <FinancialSummary data={data.financialSummary} />
-          </Paper>
+          </StyledPaper>
         </Grid>
         <Grid item xs={12} md={6}>
-          <Paper className={classes.paper}>
+          <StyledPaper>
             <InvestmentPortfolio investments={data.investments} />
-          </Paper>
+          </StyledPaper>
         </Grid>
         <Grid item xs={12} md={6}>
-          <Paper className={classes.paper}>
+          <StyledPaper>
             <SavingsGoals savingsGoals={data.savingsGoals} />
-          </Paper>
+          </StyledPaper>
         </Grid>
         <Grid item xs={12} md={6}>
-          <Paper className={classes.paper}>
+          <StyledPaper>
             <Budgets budgets={data.budgets} />
-          </Paper>
+          </StyledPaper>
         </Grid>
         <Grid item xs={12}>
-          <Paper className={classes.paper}>
+          <StyledPaper>
             <TransactionHistory transactions={data.recentTransactions} />
-          </Paper>
+          </StyledPaper>
         </Grid>
       </Grid>
     </div>

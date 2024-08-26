@@ -9,6 +9,7 @@ exports.verifyToken = async (token) => {
     const user = await User.findByPk(decoded.id);
     return user;
   } catch (error) {
+    console.log("inside tokenverfication function");
     return null;
   }
 };
