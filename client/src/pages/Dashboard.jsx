@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery } from '@apollo/client';
 import { styled } from '@mui/material/styles';
-import { Grid, Paper, Typography, CircularProgress } from '@mui/material';
+import { Grid, Paper, Typography, CircularProgress, Box } from '@mui/material';
 import InvestmentPortfolio from '../components/InvestmentPortfolio';
 import SavingsGoals from '../components/SavingsGoals';
 import Budgets from '../components/Budgets';
@@ -14,6 +14,10 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   height: '100%',
+  transition: 'transform 0.3s ease-in-out',
+  '&:hover': {
+    transform: 'translateY(-5px)',
+  },
 }));
 
 const Dashboard = () => {
@@ -23,9 +27,11 @@ const Dashboard = () => {
   if (error) return <Typography color="error">Error: {error.message}</Typography>;
 
   return (
-    <div>
-      <Typography variant="h4" gutterBottom>Dashboard</Typography>
-      <Grid container spacing={3}>
+    <Box sx={{ flexGrow: 1, padding: 3 }}>
+      <Typography variant="h4" gutterBottom sx={{ marginBottom: 4 }}>
+        Dashboard
+      </Typography>
+      <Grid container spacing={4}>
         <Grid item xs={12} md={6}>
           <StyledPaper>
             <InvestmentPortfolio investments={data?.getInvestments || []} />
@@ -41,15 +47,18 @@ const Dashboard = () => {
             <Budgets budgets={data?.getBudgets || []} />
           </StyledPaper>
         </Grid>
-        <Grid item xs={12}>
+        <Grid item xs={12} md={6}>
           <StyledPaper>
             <TransactionHistory transactions={data?.getTransactions || []} />
           </StyledPaper>
-          <StyledPaper><InvestmentChart /></StyledPaper>
-          
+        </Grid>
+        <Grid item xs={12}>
+          <StyledPaper>
+            <InvestmentChart />
+          </StyledPaper>
         </Grid>
       </Grid>
-    </div>
+    </Box>
   );
 };
 

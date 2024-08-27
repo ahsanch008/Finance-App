@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
 import { useGoogleLogin } from '@react-oauth/google';
-import { Button, Typography, Container, Box, TextField } from '@mui/material';
+import { Button, Typography, Container, Box, TextField, Paper, Divider } from '@mui/material';
 import { GOOGLE_LOGIN_MUTATION, LOGIN_MUTATION } from '../graphql/mutations';
 import { useAuth } from '../context/AuthContext';
+import GoogleIcon from '@mui/icons-material/Google';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -26,28 +27,18 @@ const Login = () => {
   const googleLogin = useGoogleLogin({
     onSuccess: async (codeResponse) => {
       setGoogleLoginStarted(false);
-      console.log('Google login response:', codeResponse);
       try {
-        console.log('Sending token to server:', codeResponse.access_token);
         const { data } = await googleLoginMutation({ 
           variables: { token: codeResponse.access_token }
         });
-        console.log('Server response:', data);
         if (data && data.googleLogin && data.googleLogin.token) {
           login(data.googleLogin.token, data.googleLogin.user);
           navigate('/dashboard');
         } else {
-          console.error('Unexpected server response:', data);
           setError('Unexpected response from server. Please try again.');
         }
       } catch (err) {
         console.error('Google login error:', err);
-        if (err.graphQLErrors) {
-          console.error('GraphQL errors:', err.graphQLErrors);
-        }
-        if (err.networkError) {
-          console.error('Network error:', err.networkError);
-        }
         setError('Google login failed. Please try again or contact support.');
       }
     },
@@ -76,56 +67,68 @@ const Login = () => {
 
   return (
     <Container component="main" maxWidth="xs">
-      <Box sx={{ marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <Typography component="h1" variant="h5">Sign in</Typography>
-        <Box component="form" onSubmit={handleEmailLogin} sx={{ mt: 1 }}>
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="email"
-            label="Email Address"
-            name="email"
-            autoComplete="email"
-            autoFocus
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-          >
-            Sign In
-          </Button>
-        </Box>
-        <Button
-          fullWidth
-          variant="contained"
-          sx={{ mt: 1, mb: 2 }}
-          onClick={handleGoogleLogin}
-          disabled={googleLoginStarted}
-        >
-          {googleLoginStarted ? 'Signing in...' : 'Sign in with Google'}
-        </Button>
-        {error && (
-          <Typography color="error" align="center">
-            {error}
+      <Box
+        sx={{
+          marginTop: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <Paper elevation={3} sx={{ padding: 4, width: '100%' }}>
+          <Typography component="h1" variant="h5" align="center" gutterBottom>
+            Sign in
           </Typography>
-        )}
+          <Box component="form" onSubmit={handleEmailLogin} sx={{ mt: 1 }}>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="email"
+              label="Email Address"
+              name="email"
+              autoComplete="email"
+              autoFocus
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="Password"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+            >
+              Sign In
+            </Button>
+          </Box>
+          <Divider sx={{ my: 2 }}>OR</Divider>
+          <Button
+            fullWidth
+            variant="outlined"
+            startIcon={<GoogleIcon />}
+            onClick={handleGoogleLogin}
+            disabled={googleLoginStarted}
+          >
+            {googleLoginStarted ? 'Signing in...' : 'Sign in with Google'}
+          </Button>
+          {error && (
+            <Typography color="error" align="center" sx={{ mt: 2 }}>
+              {error}
+            </Typography>
+          )}
+        </Paper>
       </Box>
     </Container>
   );

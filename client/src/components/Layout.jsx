@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
-import { Box, CssBaseline, Drawer, IconButton } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import { Box, CssBaseline, Drawer, IconButton, useMediaQuery } from '@mui/material';
+import { styled, useTheme } from '@mui/material/styles';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import Header from './Header';
 import Footer from './Footer';
-import Sidebar from './Sidebar'; // Assuming you have a Sidebar component
+import Sidebar from './Sidebar';
 
 const drawerWidth = 240;
+
+const Root = styled('div')(({ theme }) => ({
+  display: 'flex',
+  minHeight: '100vh',
+  backgroundColor: theme.palette.background.default,
+}));
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
   ({ theme, open }) => ({
@@ -17,13 +23,13 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
-    marginLeft: `-${drawerWidth}px`,
+    marginLeft: 0,
     ...(open && {
       transition: theme.transitions.create('margin', {
         easing: theme.transitions.easing.easeOut,
         duration: theme.transitions.duration.enteringScreen,
       }),
-      marginLeft: 0,
+      marginLeft: `${drawerWidth}px`,
     }),
   }),
 );
@@ -37,7 +43,9 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 }));
 
 const Layout = ({ children }) => {
-  const [open, setOpen] = useState(true);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const [open, setOpen] = useState(!isMobile);
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -48,7 +56,7 @@ const Layout = ({ children }) => {
   };
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Root>
       <CssBaseline />
       <Header open={open} handleDrawerOpen={handleDrawerOpen} />
       <Drawer
@@ -58,11 +66,14 @@ const Layout = ({ children }) => {
           '& .MuiDrawer-paper': {
             width: drawerWidth,
             boxSizing: 'border-box',
+            backgroundColor: theme.palette.background.default,
+            borderRight: `1px solid ${theme.palette.divider}`,
           },
         }}
-        variant="persistent"
+        variant={isMobile ? 'temporary' : 'persistent'}
         anchor="left"
         open={open}
+        onClose={handleDrawerClose}
       >
         <DrawerHeader>
           <IconButton onClick={handleDrawerClose}>
@@ -73,11 +84,13 @@ const Layout = ({ children }) => {
       </Drawer>
       <Main open={open}>
         <DrawerHeader />
-        {children}
+        <Box sx={{ maxWidth: 1200, margin: '0 auto' }}>
+          {children}
+        </Box>
       </Main>
       <Footer />
-    </Box>
+    </Root>
   );
 };
 
-export default Layout;  // Make sure this line is present
+export default Layout;

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import { Typography, Button, Grid, Container } from '@mui/material';
 import Header from '../components/Header';
-import Footer from '../components/Footer';
+import Si from '../components/Footer';
 
 const StyledContainer = styled('div')(({ theme }) => ({
   hero: {
@@ -21,9 +21,18 @@ const StyledContainer = styled('div')(({ theme }) => ({
   features: {
     padding: theme.spacing(8, 0),
   },
+  root: {
+    display: 'flex',
+  },
+  content: {
+    flexGrow: 1,
+    padding: theme.spacing(3),
+  },
 }));
 
 const HomePage = () => {
+ 
+
   return (
     <StyledContainer>
       <Header />
@@ -54,7 +63,7 @@ const HomePage = () => {
         </div>
         {/* Add more sections as needed */}
       </main>
-      <Footer />
+  
     </StyledContainer>
   );
 };

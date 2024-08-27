@@ -7,7 +7,9 @@ const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useAuth();
   const token = Cookies.get('authToken');
   if (!isAuthenticated && !token) {
-    return <Navigate to="/login" replace />;
+    // Instead of redirecting, we'll return to the homepage
+    // The login modal can be opened from the header
+    return <Navigate to="/" replace />;
   }
 
   return children;

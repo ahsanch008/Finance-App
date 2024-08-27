@@ -1,6 +1,6 @@
 import React from 'react';
-import { List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { List, ListItem, ListItemIcon, ListItemText, ListItemButton } from '@mui/material';
+import { Link, useLocation } from 'react-router-dom';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import ReceiptIcon from '@mui/icons-material/Receipt';
@@ -8,6 +8,7 @@ import ShowChartIcon from '@mui/icons-material/ShowChart';
 import SettingsIcon from '@mui/icons-material/Settings';
 
 const Sidebar = () => {
+  const location = useLocation();
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
     { text: 'Accounts', icon: <AccountBalanceIcon />, path: '/accounts' },
@@ -19,9 +20,15 @@ const Sidebar = () => {
   return (
     <List>
       {menuItems.map((item) => (
-        <ListItem button key={item.text} component={Link} to={item.path}>
-          <ListItemIcon>{item.icon}</ListItemIcon>
-          <ListItemText primary={item.text} />
+        <ListItem key={item.text} disablePadding>
+          <ListItemButton
+            component={Link}
+            to={item.path}
+            selected={location.pathname === item.path}
+          >
+            <ListItemIcon>{item.icon}</ListItemIcon>
+            <ListItemText primary={item.text} />
+          </ListItemButton>
         </ListItem>
       ))}
     </List>
