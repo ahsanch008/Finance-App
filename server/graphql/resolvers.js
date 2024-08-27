@@ -8,6 +8,8 @@ const budgetService = require('../services/budgetService');
 const investmentService = require('../services/investmentService');
 //const financialSummaryService = require('../services/financialSummaryService');
 const { authorize } = require('../middlewares/auth');
+const { Transaction, Account } = require('../models');
+const { Op } = require('sequelize');
 
 const resolvers = {
   Query: {
@@ -28,8 +30,8 @@ const resolvers = {
     getCards: authorize()(async (_, __, { user }) => {
       return await cardService.getCards(user.id);
     }),
-    getTransactions: authorize()(async (_, { startDate, endDate, category }, { user }) => {
-      return await transactionService.getTransactions(user.id, startDate, endDate, category);
+    getTransactions: authorize()(async (_, { startDate, endDate, category, limit }, { user }) => {
+      return await transactionService.getTransactions(user.id, startDate, endDate, category, limit);
     }),
     getBudgets: authorize()(async (_, __, { user }) => {
       return await budgetService.getBudgets(user.id);
@@ -47,9 +49,107 @@ const resolvers = {
       if (investment.userId !== user.id) throw new ForbiddenError('Not authorized to view this investment');
       return investment;
     }),
-    // financialSummary: authorize()(async (_, { startDate, endDate }, { user }) => {
-    //   return await financialSummaryService.getFinancialSummary(user.id, startDate, endDate);
-    // }),
+    getMonthlyReport: async (_, { year, month }, { user }) => {
+      if (!user) throw new Error('Authentication required');
+
+      const startDate = new Date(year, month - 1, 1);
+      const endDate = new Date(year, month, 0);
+
+      const transactions = await Transaction.findAll({
+        where: {
+          UserId: user.id,
+          date: {
+            [Op.between]: [startDate, endDate]
+          }
+        }
+      });
+
+      const totalIncome = transactions
+        .filter(t => t.amount > 0)
+        .reduce((sum, t) => sum + t.amount, 0);
+
+      const totalExpenses = transactions
+        .filter(t => t.amount < 0)
+        .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+
+      const netSavings = totalIncome - totalExpenses;
+
+      const categoryBreakdown = transactions.reduce((acc, t) => {
+        if (!acc[t.category]) acc[t.category] = 0;
+        acc[t.category] += Math.abs(t.amount);
+        return acc;
+      }, {});
+
+      return {
+        month,
+        year,
+        totalIncome,
+        totalExpenses,
+        netSavings,
+        categoryBreakdown: Object.entries(categoryBreakdown).map(([category, amount]) => ({
+          category,
+          amount
+        }))
+      };
+    },
+    getAccounts: async (_, __, { user }) => {
+      if (!user) throw new Error('Authentication required');
+
+      return await Account.findAll({
+        where: { UserId: user.id }
+      });
+    },
+    getPaginatedTransactions: async (_, args, { user }) => {
+      if (!user) throw new Error('Authentication required');
+
+      const {
+        page = 1,
+        limit = 10,
+        startDate,
+        endDate,
+        category,
+        sortBy = 'date',
+        sortOrder = 'DESC'
+      } = args;
+
+      const offset = (page - 1) * limit;
+
+      const whereClause = { UserId: user.id };
+      if (startDate && endDate) {
+        whereClause.date = { [Op.between]: [new Date(startDate), new Date(endDate)] };
+      }
+      if (category) {
+        whereClause.category = category;
+      }
+
+      const { count, rows } = await Transaction.findAndCountAll({
+        where: whereClause,
+        order: [[sortBy, sortOrder]],
+        limit,
+        offset
+      });
+
+      const hasNextPage = offset + rows.length < count;
+      const endCursor = rows.length > 0 ? rows[rows.length - 1].id : null;
+
+      return {
+        edges: rows.map(transaction => ({
+          node: transaction,
+          cursor: transaction.id.toString()
+        })),
+        pageInfo: {
+          hasNextPage,
+          endCursor: endCursor ? endCursor.toString() : null
+        },
+        totalCount: count
+      };
+    },
+  },
+  SavingsGoal: {
+    progress: (savingsGoal) => {
+      if (savingsGoal.targetAmount === 0) return 0; // Avoid division by zero
+      return (savingsGoal.currentAmount / savingsGoal.targetAmount) * 100;
+    },
   },
   Mutation: {
     register: async (_, { name, email, password }) => {
@@ -203,6 +303,7 @@ const resolvers = {
         throw new UserInputError(error.message);
       }
     }),
+    
     updateInvestment: authorize()(async (_, { id, input }, { user }) => {
       try {
         const investment = await investmentService.getInvestment(id);
@@ -233,5 +334,6 @@ const resolvers = {
     }),
   },
 };
+
 
 module.exports = resolvers;

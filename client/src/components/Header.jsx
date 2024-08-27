@@ -1,10 +1,17 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, IconButton } from '@mui/material';
+import { AppBar, Toolbar, Typography, IconButton, Button } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Header = ({ open, handleDrawerOpen }) => {
-  const { isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
@@ -21,7 +28,11 @@ const Header = ({ open, handleDrawerOpen }) => {
         <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
           Finance App
         </Typography>
-        {/* Add other header content here */}
+        {isAuthenticated ? (
+          <Button color="inherit" onClick={handleLogout}>Logout</Button>
+        ) : (
+          <Button color="inherit" onClick={() => navigate('/login')}>Login</Button>
+        )}
       </Toolbar>
     </AppBar>
   );

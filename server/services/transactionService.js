@@ -5,7 +5,7 @@ exports.createTransaction = async (transactionData) => {
   return await Transaction.create(transactionData);
 };
 
-exports.getTransactions = async (userId, startDate, endDate, category) => {
+exports.getTransactions = async (userId, startDate, endDate, category, limit) => {
   const where = { UserId: userId };
   if (startDate && endDate) {
     where.date = { [Op.between]: [startDate, endDate] };
@@ -13,7 +13,17 @@ exports.getTransactions = async (userId, startDate, endDate, category) => {
   if (category) {
     where.category = category;
   }
-  return await Transaction.findAll({ where, order: [['date', 'DESC']] });
+
+  const options = { 
+    where, 
+    order: [['date', 'DESC']]
+  };
+
+  if (limit && !isNaN(limit)) {
+    options.limit = parseInt(limit, 10);
+  }
+
+  return await Transaction.findAll(options);
 };
 
 exports.updateTransaction = async (id, userId, updateData) => {

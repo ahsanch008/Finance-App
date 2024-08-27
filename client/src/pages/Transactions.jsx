@@ -4,7 +4,7 @@ import { GET_TRANSACTIONS } from '../graphql/queries';
 import { CREATE_TRANSACTION } from '../graphql/mutations';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 
-const TransactionsPage = () => {
+const Transactions = () => {
   const [open, setOpen] = useState(false);
   const [newTransaction, setNewTransaction] = useState({ amount: '', category: '', description: '' });
   const { loading, error, data, refetch } = useQuery(GET_TRANSACTIONS);
@@ -40,8 +40,8 @@ const TransactionsPage = () => {
     }
   };
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error.message}</p>;
+  if (loading) return <Typography>Loading...</Typography>;
+  if (error) return <Typography color="error">Error: {error.message}</Typography>;
 
   return (
     <div>
@@ -60,7 +60,7 @@ const TransactionsPage = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {data.transactions.map((transaction) => (
+            {data.getTransactions.map((transaction) => (
               <TableRow key={transaction.id}>
                 <TableCell>{new Date(transaction.date).toLocaleDateString()}</TableCell>
                 <TableCell>{transaction.description}</TableCell>
@@ -112,4 +112,4 @@ const TransactionsPage = () => {
   );
 };
 
-export default TransactionsPage;
+export default Transactions;

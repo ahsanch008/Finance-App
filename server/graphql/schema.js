@@ -7,7 +7,7 @@ const typeDefs = gql`
     email: String!
     role: String!
     googleId: String
-    isEmailVerified: Boolean!
+    isEmailVerified: Boolean
     transactions: [Transaction!]
     investments: [Investment!]
     savingsGoals: [SavingsGoal!]
@@ -16,7 +16,9 @@ const typeDefs = gql`
     createdAt: String!
     updatedAt: String!
   }
-
+  type Mutation {
+  googleLogin(token: String!): AuthPayload!
+}
   type AuthPayload {
     token: String!
     user: User!
@@ -28,7 +30,7 @@ const typeDefs = gql`
     category: String!
     description: String
     date: String!
-    type: TransactionType!
+    type: TransactionType
     user: User!
     createdAt: String!
     updatedAt: String!
@@ -55,8 +57,7 @@ const typeDefs = gql`
     name: String!
     targetAmount: Float!
     currentAmount: Float!
-    deadline: String
-    progress: Float!
+    progress: Float
     user: User!
     createdAt: String!
     updatedAt: String!
@@ -65,8 +66,8 @@ const typeDefs = gql`
   type Budget {
     id: ID!
     category: String!
-    limit: Float!
-    spent: Float!
+    limit: Float
+    spent: Float
     period: BudgetPeriod!
     user: User!
     createdAt: String!
@@ -131,12 +132,11 @@ const typeDefs = gql`
     getSavingsGoals: [SavingsGoal!]!
     getSavingsGoal(id: ID!): SavingsGoal
     getCards: [Card!]!
-    getTransactions(startDate: String, endDate: String, category: String): [Transaction!]!
+    getTransactions(startDate: String, endDate: String, category: String, limit: Int): [Transaction!]!
     getBudgets: [Budget!]!
     getBudget(id: ID!): Budget
     getInvestments(startDate: String, endDate: String, type: String): [Investment!]!
     getInvestment(id: ID!): Investment
-    financialSummary(startDate: String, endDate: String): FinancialSummary!
     
   
     getPaginatedTransactions(page: Int, limit: Int, startDate: String, endDate: String, category: String, sortBy: String, sortOrder: String): TransactionConnection!
@@ -174,8 +174,6 @@ const typeDefs = gql`
 
     addTransactionCategory(name: String!): Boolean!
     
- 
-    updateNotificationPreferences(preferences: NotificationPreferencesInput!): User!
   }
 
   type TransactionConnection {
@@ -208,10 +206,44 @@ const typeDefs = gql`
     amount: Float!
   }
 
-  input NotificationPreferencesInput {
-    emailNotifications: Boolean!
-    pushNotifications: Boolean!
+  type Account {
+    id: ID!
+    name: String!
+    type: String!
+    balance: Float!
+    institution: String!
+    lastUpdated: String!
+  }
 
+  type PaginatedTransactions {
+    edges: [TransactionEdge!]!
+    pageInfo: PageInfo!
+    totalCount: Int!
+  }
+
+  type TransactionEdge {
+    node: Transaction!
+    cursor: String!
+  }
+
+  type PageInfo {
+    hasNextPage: Boolean!
+    endCursor: String
+  }
+
+
+  extend type Query {
+    getMonthlyReport(year: Int!, month: Int!): MonthlyReport!
+    getAccounts: [Account!]!
+    getPaginatedTransactions(
+      page: Int
+      limit: Int
+      startDate: String
+      endDate: String
+      category: String
+      sortBy: String
+      sortOrder: String
+    ): TransactionConnection!
   }
 `;
 

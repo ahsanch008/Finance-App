@@ -2,12 +2,12 @@ import React from 'react';
 import { useQuery } from '@apollo/client';
 import { styled } from '@mui/material/styles';
 import { Grid, Paper, Typography, CircularProgress } from '@mui/material';
-import { GET_DASHBOARD_DATA } from '../graphql/queries';
-import FinancialSummary from '../components/FinancialSummary';
-import TransactionHistory from '../components/TransactionHistory';
 import InvestmentPortfolio from '../components/InvestmentPortfolio';
 import SavingsGoals from '../components/SavingsGoals';
 import Budgets from '../components/Budgets';
+import TransactionHistory from '../components/TransactionHistory';
+import { GET_DASHBOARD_DATA } from '../graphql/queries';
+import InvestmentChart from '../components/InvestmentChart';
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
@@ -28,28 +28,25 @@ const Dashboard = () => {
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
           <StyledPaper>
-            <FinancialSummary data={data.financialSummary} />
+            <InvestmentPortfolio investments={data?.getInvestments || []} />
           </StyledPaper>
         </Grid>
         <Grid item xs={12} md={6}>
           <StyledPaper>
-            <InvestmentPortfolio investments={data.investments} />
+            <SavingsGoals savingsGoals={data?.getSavingsGoals || []} />
           </StyledPaper>
         </Grid>
         <Grid item xs={12} md={6}>
           <StyledPaper>
-            <SavingsGoals savingsGoals={data.savingsGoals} />
-          </StyledPaper>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <StyledPaper>
-            <Budgets budgets={data.budgets} />
+            <Budgets budgets={data?.getBudgets || []} />
           </StyledPaper>
         </Grid>
         <Grid item xs={12}>
           <StyledPaper>
-            <TransactionHistory transactions={data.recentTransactions} />
+            <TransactionHistory transactions={data?.getTransactions || []} />
           </StyledPaper>
+          <StyledPaper><InvestmentChart /></StyledPaper>
+          
         </Grid>
       </Grid>
     </div>

@@ -18,34 +18,45 @@ const Login = () => {
 
   const [googleLoginStarted, setGoogleLoginStarted] = useState(false);
 
+  const handleGoogleLogin = async () => {
+    setGoogleLoginStarted(true);
+    googleLogin();
+  };
+
   const googleLogin = useGoogleLogin({
     onSuccess: async (codeResponse) => {
       setGoogleLoginStarted(false);
+      console.log('Google login response:', codeResponse);
       try {
+        console.log('Sending token to server:', codeResponse.access_token);
         const { data } = await googleLoginMutation({ 
           variables: { token: codeResponse.access_token }
         });
+        console.log('Server response:', data);
         if (data && data.googleLogin && data.googleLogin.token) {
-          login(data.googleLogin.token);
+          login(data.googleLogin.token, data.googleLogin.user);
           navigate('/dashboard');
         } else {
+          console.error('Unexpected server response:', data);
           setError('Unexpected response from server. Please try again.');
         }
       } catch (err) {
         console.error('Google login error:', err);
+        if (err.graphQLErrors) {
+          console.error('GraphQL errors:', err.graphQLErrors);
+        }
+        if (err.networkError) {
+          console.error('Network error:', err.networkError);
+        }
         setError('Google login failed. Please try again or contact support.');
       }
     },
-    onError: () => {
+    onError: (error) => {
       setGoogleLoginStarted(false);
+      console.error('Google login error:', error);
       setError('Google login failed. Please try again or contact support.');
     }
   });
-
-  const handleGoogleLogin = () => {
-    setGoogleLoginStarted(true);
-    googleLogin();
-  };
 
   const handleEmailLogin = async (e) => {
     e.preventDefault();

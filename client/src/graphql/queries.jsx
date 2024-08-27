@@ -76,16 +76,14 @@ export const GET_CARDS = gql`
 `;
 
 export const GET_TRANSACTIONS = gql`
-  query GetTransactions($startDate: String, $endDate: String, $category: String) {
-    getTransactions(startDate: $startDate, endDate: $endDate, category: $category) {
+  query GetTransactions($startDate: String, $endDate: String, $category: String, $limit: Int) {
+    getTransactions(startDate: $startDate, endDate: $endDate, category: $category, limit: $limit) {
       id
       amount
       category
       description
       date
       type
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -126,8 +124,7 @@ export const GET_INVESTMENTS = gql`
       amount
       date
       currentValue
-      createdAt
-      updatedAt
+    
     }
   }
 `;
@@ -229,11 +226,6 @@ export const GET_DASHBOARD_DATA = gql`
       category
       limit
       spent
-    }
-    financialSummary {
-      totalIncome
-      totalExpenses
-      netSavings
     }
   }
 `;

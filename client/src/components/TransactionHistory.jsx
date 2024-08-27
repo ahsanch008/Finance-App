@@ -1,7 +1,16 @@
 import React from 'react';
-import { Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { useQuery } from '@apollo/client';
+import { Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, CircularProgress } from '@mui/material';
+import { GET_TRANSACTIONS } from '../graphql/queries';
 
-const TransactionHistory = ({ transactions }) => {
+const TransactionHistory = () => {
+  const { loading, error, data } = useQuery(GET_TRANSACTIONS, {
+    variables: { limit: 5 } // Fetch only the 5 most recent transactions
+  });
+
+  if (loading) return <CircularProgress />;
+  if (error) return <Typography color="error">Error: {error.message}</Typography>;
+
   return (
     <>
       <Typography variant="h6" gutterBottom>Recent Transactions</Typography>
@@ -16,7 +25,7 @@ const TransactionHistory = ({ transactions }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {transactions.map((transaction) => (
+            {data.getTransactions.map((transaction) => (
               <TableRow key={transaction.id}>
                 <TableCell>{new Date(transaction.date).toLocaleDateString()}</TableCell>
                 <TableCell>{transaction.description}</TableCell>

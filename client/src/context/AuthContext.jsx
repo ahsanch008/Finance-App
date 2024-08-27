@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { getToken, setToken, removeToken } from '../utils/auth';
-
+import Cookies from 'js-cookie';
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -8,7 +8,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const token = getToken();
+    const token = Cookies.get('authToken');
     if (token) {
       setIsAuthenticated(true);
       // You might want to fetch user data here using the token
@@ -16,13 +16,13 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (token, userData) => {
-    setToken(token);
+    Cookies.set('authToken', token, { expires:1 }); // Set cookie to expire in 7 days
     setIsAuthenticated(true);
     setUser(userData);
   };
 
   const logout = () => {
-    removeToken();
+    Cookies.remove('authToken');
     setIsAuthenticated(false);
     setUser(null);
   };

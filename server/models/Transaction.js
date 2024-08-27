@@ -22,7 +22,10 @@ const Transaction = sequelize.define('Transaction', {
   date: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW
+  },
+  type: {
+    type: DataTypes.STRING,
+    allowNull: true
   }
 });
-
 module.exports = Transaction;

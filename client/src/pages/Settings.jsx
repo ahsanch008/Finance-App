@@ -1,94 +1,116 @@
-import React, { useState } from 'react';
-import { 
-  Container, 
-  Typography, 
-  Paper, 
-  Switch, 
-  FormControlLabel, 
-  Button, 
-  TextField,
-  Box
-} from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { useMutation, useQuery } from '@apollo/client';
+import { GET_USER_PROFILE } from '../graphql/queries';
+import { UPDATE_USER_PROFILE, CHANGE_PASSWORD } from '../graphql/mutations';
+import { Typography, Paper, Grid, TextField, Button } from '@mui/material';
 
 const Settings = () => {
-  const [darkMode, setDarkMode] = useState(false);
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [currency, setCurrency] = useState('USD');
+  const [userId, setUserId] = useState(null);
 
-  const handleDarkModeChange = (event) => {
-    setDarkMode(event.target.checked);
-    // Here you would typically update this setting in your app's state or localStorage
+  useEffect(() => {
+    const storedUserId = localStorage.getItem('userId');
+    if (storedUserId) {
+      setUserId(storedUserId);
+    }
+  }, []);
+
+  const { loading, error, data } = useQuery(GET_USER_PROFILE, {
+    variables: { id: userId },
+    skip: !userId, // Skip the query if userId is not available
+  });
+  const [updateProfile] = useMutation(UPDATE_USER_PROFILE);
+  const [changePassword] = useMutation(CHANGE_PASSWORD);
+
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+
+  React.useEffect(() => {
+    if (data && data.me) {
+      setName(data.me.name);
+      setEmail(data.me.email);
+    }
+  }, [data]);
+
+  const handleUpdateProfile = async () => {
+    try {
+      await updateProfile({ variables: { name } });
+      alert('Profile updated successfully');
+    } catch (err) {
+      console.error('Error updating profile:', err);
+      alert('Error updating profile');
+    }
   };
 
-  const handleEmailNotificationsChange = (event) => {
-    setEmailNotifications(event.target.checked);
-    // Here you would typically update this setting in your backend
+  const handleChangePassword = async () => {
+    try {
+      await changePassword({ variables: { currentPassword, newPassword } });
+      alert('Password changed successfully');
+      setCurrentPassword('');
+      setNewPassword('');
+    } catch (err) {
+      console.error('Error changing password:', err);
+      alert('Error changing password');
+    }
   };
 
-  const handleCurrencyChange = (event) => {
-    setCurrency(event.target.value);
-    // Here you would typically update this setting in your backend
-  };
-
-  const handleSave = () => {
-    // Here you would typically send these settings to your backend
-    console.log('Settings saved:', { darkMode, emailNotifications, currency });
-  };
+  if (loading) return <Typography>Loading...</Typography>;
+  if (error) return <Typography color="error">Error: {error.message}</Typography>;
 
   return (
-    <Container maxWidth="sm">
-      <Typography variant="h4" gutterBottom>
-        Settings
-      </Typography>
-      <Paper elevation={3} style={{ padding: '20px' }}>
-        <FormControlLabel
-          control={
-            <Switch
-              checked={darkMode}
-              onChange={handleDarkModeChange}
-              name="darkMode"
-              color="primary"
-            />
-          }
-          label="Dark Mode"
-        />
-        <Box my={2}>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={emailNotifications}
-                onChange={handleEmailNotificationsChange}
-                name="emailNotifications"
-                color="primary"
-              />
-            }
-            label="Email Notifications"
-          />
-        </Box>
-        <Box my={2}>
+    <Paper style={{ padding: '20px' }}>
+      <Typography variant="h4" gutterBottom>Settings</Typography>
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
           <TextField
-            select
-            label="Currency"
-            value={currency}
-            onChange={handleCurrencyChange}
-            SelectProps={{
-              native: true,
-            }}
             fullWidth
-          >
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-            <option value="GBP">GBP</option>
-            {/* Add more currency options as needed */}
-          </TextField>
-        </Box>
-        <Box mt={3}>
-          <Button variant="contained" color="primary" onClick={handleSave}>
-            Save Settings
+            label="Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            label="Email"
+            value={email}
+            disabled
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <Button variant="contained" color="primary" onClick={handleUpdateProfile}>
+            Update Profile
           </Button>
-        </Box>
-      </Paper>
-    </Container>
+        </Grid>
+        <Grid item xs={12}>
+          <Typography variant="h6">Change Password</Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            type="password"
+            label="Current Password"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            type="password"
+            label="New Password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <Button variant="contained" color="primary" onClick={handleChangePassword}>
+            Change Password
+          </Button>
+        </Grid>
+      </Grid>
+    </Paper>
   );
 };
 
