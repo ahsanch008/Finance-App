@@ -28,34 +28,46 @@ ChartJS.register(
 const InvestmentChart = () => {
 	const [chartData, setChartData] = useState(null);
 	const { loading: investmentsLoading, error: investmentsError, data: investmentsData } = useQuery(GET_INVESTMENTS);
+	
 	const { loading: transactionsLoading, error: transactionsError, data: transactionsData } = useQuery(GET_TRANSACTIONS);
+	
 
 	useEffect(() => {
 		if (investmentsData && transactionsData) {
+			
 			const processedData = processData(investmentsData.getInvestments, transactionsData.getTransactions);
+			
 			setChartData(processedData);
 		}
 	}, [investmentsData, transactionsData]);
 
 	const processData = (investments, transactions) => {
+		console.log('Processing data...');
 		const dataPoints = {};
 
 		const processDate = (dateString) => {
-			const date = new Date(dateString);
-			return isNaN(date.getTime()) ? null : date.toISOString().split('T')[0];
+			// Convert milliseconds to seconds by dividing by 1000
+			const date = new Date(parseInt(dateString, 10));
+			if (isNaN(date.getTime())) {
+				console.warn(`Invalid date: ${dateString}`);
+				return null;
+			}
+			return date.toISOString().split('T')[0];
 		};
 
 		investments.forEach(investment => {
 			const date = processDate(investment.date);
 			if (date) {
-				dataPoints[date] = (dataPoints[date] || 0) + investment.amount;
+				dataPoints[date] = (dataPoints[date] || 0) + parseFloat(investment.amount);
 			}
 		});
 
 		transactions.forEach(transaction => {
 			const date = processDate(transaction.date);
 			if (date) {
-				dataPoints[date] = (dataPoints[date] || 0) + (transaction.type === 'INCOME' ? transaction.amount : -transaction.amount);
+				const amount = parseFloat(transaction.amount);
+				// Assuming all transactions are expenses for now
+				dataPoints[date] = (dataPoints[date] || 0) - amount;
 			}
 		});
 
@@ -67,6 +79,7 @@ const InvestmentChart = () => {
 			runningTotal += dataPoints[date];
 			return runningTotal;
 		});
+
 
 		return {
 			labels,
@@ -91,6 +104,14 @@ const InvestmentChart = () => {
 			title: {
 				display: true,
 				text: 'Portfolio Performance Over Time',
+				font: {
+					size: 18,
+				},
+			},
+			tooltip: {
+				callbacks: {
+					label: (context) => `$${context.parsed.y.toFixed(2)}`,
+				},
 			},
 		},
 		scales: {
@@ -98,12 +119,27 @@ const InvestmentChart = () => {
 				title: {
 					display: true,
 					text: 'Date',
+					font: {
+						size: 14,
+						weight: 'bold',
+					},
+				},
+				ticks: {
+					maxRotation: 45,
+					minRotation: 45,
 				},
 			},
 			y: {
 				title: {
 					display: true,
-					text: 'Value ($)',
+					text: 'Portfolio Value ($)',
+					font: {
+						size: 14,
+						weight: 'bold',
+					},
+				},
+				ticks: {
+					callback: (value) => `$${value.toLocaleString()}`,
 				},
 				beginAtZero: true,
 			},
@@ -113,11 +149,12 @@ const InvestmentChart = () => {
 	if (investmentsLoading || transactionsLoading) return <CircularProgress />;
 	if (investmentsError) return <Typography color="error">Error loading investments: {investmentsError.message}</Typography>;
 	if (transactionsError) return <Typography color="error">Error loading transactions: {transactionsError.message}</Typography>;
-	if (!chartData) return null;
+	if (!chartData) return <Typography>Processing data...</Typography>;
+	if (chartData.labels.length === 0) return <Typography>No data available for the chart</Typography>;
 
 	return (
-		<Box sx={{ width: '100%', maxWidth: 800, margin: 'auto' }}>
-			<Typography variant="h6" gutterBottom align="center">Portfolio Performance</Typography>
+		<Box sx={{ width: '100%', maxWidth: 800, margin: 'auto', padding: 2 }}>
+			<Typography variant="h5" gutterBottom align="center">Portfolio Performance</Typography>
 			<Line data={chartData} options={chartOptions} />
 		</Box>
 	);

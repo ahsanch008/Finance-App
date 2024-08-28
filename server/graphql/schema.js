@@ -129,6 +129,18 @@ const typeDefs = gql`
     accessToken: String
     message: String
   }
+    type AnnualSummary {
+    year: Int!
+    totalIncome: Float!
+    totalExpenses: Float!
+    netSavings: Float!
+    categoryBreakdown: [CategoryAmount!]!
+  }
+
+  type CategoryAmount {
+    category: String!
+    amount: Float!
+  }
 
   type Query {
     me: User
@@ -150,6 +162,7 @@ const typeDefs = gql`
     
     
     getMonthlyReport(year: Int!, month: Int!): MonthlyReport!
+    getAnnualSummary(year: Int!): AnnualSummary!
   }
 
   type Mutation {

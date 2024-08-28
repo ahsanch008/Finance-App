@@ -76,7 +76,7 @@ const PlaidLink = () => {
         color="primary"
         sx={{ mb: 2 }}
       >
-        {Cookies.get('plaidAccessToken') ? 'Update Plaid Link' : 'Link Sandbox Account'}
+        {Cookies.get('plaidAccessToken') ? 'Update Plaid Link' : 'Link Bank Account'}
       </Button>
       {linkStatus && (
         <Typography color={linkStatus.includes('Error') ? 'error' : 'success'} sx={{ mb: 2 }}>
@@ -86,10 +86,10 @@ const PlaidLink = () => {
       <Typography variant="body2">
         {Cookies.get('plaidAccessToken') 
           ? 'Your Plaid account is linked. Click the button above to update or relink.'
-          : 'Click to link a Plaid sandbox account and view sample data.'}
+          : 'Click to link a Bank Account and view updated real time data.'}
       </Typography>
       <Typography variant="body2" sx={{ mt: 2 }}>
-        Note: If no account is linked, default sandbox data will be displayed.
+        Note: No Bank Account is linked. Please link your account to view updated transactions and summary.
       </Typography>
     </Box>
   );

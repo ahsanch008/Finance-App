@@ -1,69 +1,76 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
-import { Typography, Button, Grid, Container } from '@mui/material';
+import { Typography, Button, Grid, Container, Box } from '@mui/material';
 import Header from '../components/Header';
-import Si from '../components/Footer';
+import Footer from '../components/Footer';
 
 const StyledContainer = styled('div')(({ theme }) => ({
+  root: {
+    display: 'flex',
+    flexDirection: 'column',
+    minHeight: '100vh',
+  },
   hero: {
-    backgroundColor: theme.palette.background.paper,
-    padding: theme.spacing(8, 0, 6),
+    backgroundImage: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+    color: theme.palette.common.white,
+    padding: theme.spacing(12, 0, 10),
   },
   heroContent: {
-    maxWidth: 600,
+    maxWidth: 700,
     margin: '0 auto',
     textAlign: 'center',
   },
   heroButtons: {
-    marginTop: theme.spacing(4),
+    marginTop: theme.spacing(6),
   },
   features: {
-    padding: theme.spacing(8, 0),
-  },
-  root: {
-    display: 'flex',
+    padding: theme.spacing(10, 0),
+    backgroundColor: theme.palette.background.paper,
   },
   content: {
     flexGrow: 1,
-    padding: theme.spacing(3),
   },
 }));
 
 const HomePage = () => {
- 
-
   return (
     <StyledContainer>
-      <Header />
-      <main>
-        <div className="hero">
-          <Container className="heroContent">
-            <Typography component="h1" variant="h2" align="center" color="textPrimary" gutterBottom>
-              Welcome to Finance App
-            </Typography>
-            <Typography variant="h5" align="center" color="textSecondary" paragraph>
-              Manage your finances with ease. Track expenses, set budgets, and achieve your financial goals.
-            </Typography>
-            <div className="heroButtons">
-              <Grid container spacing={2} justifyContent="center">
-                <Grid item>
-                  <Button variant="contained" color="primary" component={Link} to="/register">
-                    Get Started
-                  </Button>
+      <Box className="root">
+        <Header />
+        <main className="content">
+          <Box className="hero">
+            <Container className="heroContent">
+              <Typography component="h1" variant="h2" gutterBottom>
+                Welcome to Finance App
+              </Typography>
+              <Typography variant="h5" paragraph>
+                Manage your finances with ease. Track expenses, set budgets, and achieve your financial goals.
+              </Typography>
+              <Box className="heroButtons">
+                <Grid container spacing={3} justifyContent="center">
+                  <Grid item>
+                    <Button variant="contained" size="large" component={Link} to="/login"
+                      sx={{ backgroundColor: 'white', color: 'primary.main', '&:hover': { backgroundColor: 'grey.100' } }}>
+                      Get Started
+                    </Button>
+                  </Grid>
+                  <Grid item>
+                    <Button variant="outlined" size="large" component={Link} to="/login"
+                      sx={{ borderColor: 'white', color: 'white', '&:hover': { borderColor: 'grey.300', backgroundColor: 'rgba(255, 255, 255, 0.1)' } }}>
+                      Login
+                    </Button>
+                  </Grid>
                 </Grid>
-                <Grid item>
-                  <Button variant="outlined" color="primary" component={Link} to="/login">
-                    Login
-                  </Button>
-                </Grid>
-              </Grid>
-            </div>
-          </Container>
-        </div>
-        {/* Add more sections as needed */}
-      </main>
-  
+              </Box>
+            </Container>
+          </Box>
+          <Box className="features">
+            {/* Add feature section content here */}
+          </Box>
+        </main>
+        <Footer />
+      </Box>
     </StyledContainer>
   );
 };

@@ -292,3 +292,17 @@ export const GET_PLAID_TRANSACTIONS = gql`
     }
   }
 `;
+export const GET_ANNUAL_SUMMARY = gql`
+  query GetAnnualSummary($year: Int!) {
+    getAnnualSummary(year: $year) {
+      year
+      totalIncome
+      totalExpenses
+      netSavings
+      categoryBreakdown {
+        category
+        amount
+      }
+    }
+  }
+`;

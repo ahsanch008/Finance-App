@@ -107,6 +107,48 @@ const resolvers = {
         }))
       };
     },
+    getAnnualSummary: async (_, { year }, { user }) => {
+      if (!user) throw new Error('Authentication required');
+
+      const startDate = new Date(year, 0, 1);
+      const endDate = new Date(year, 11, 31);
+
+      const transactions = await Transaction.findAll({
+        where: {
+          UserId: user.id,
+          date: {
+            [Op.between]: [startDate, endDate]
+          }
+        }
+      });
+
+      const totalIncome = transactions
+        .filter(t => t.type === 'income')
+        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+
+      const totalExpenses = transactions
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+
+      const netSavings = totalIncome - totalExpenses;
+
+      const categoryBreakdown = transactions.reduce((acc, t) => {
+        if (!acc[t.category]) acc[t.category] = 0;
+        acc[t.category] += Math.abs(t.amount);
+        return acc;
+      }, {});
+
+      return {
+        year,
+        totalIncome: parseFloat(totalIncome.toFixed(2)),
+        totalExpenses: parseFloat(totalExpenses.toFixed(2)),
+        netSavings: parseFloat(netSavings.toFixed(2)),
+        categoryBreakdown: Object.entries(categoryBreakdown).map(([category, amount]) => ({
+          category,
+          amount
+        }))
+      };
+    },
     getAccounts: async (_, __, { user }) => {
       if (!user) throw new Error('Authentication required');
 

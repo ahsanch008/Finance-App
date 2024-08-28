@@ -10,7 +10,7 @@ import client from './apolloClient';
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ApolloProvider client={client}>
-      <GoogleOAuthProvider clientId="31404322021-19hfk7j8i8u4hu0a5m0f77cgsdojvu49.apps.googleusercontent.com">
+      <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
         <AuthProvider>
           <App />
         </AuthProvider>

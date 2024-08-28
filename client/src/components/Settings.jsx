@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useMutation, useQuery } from '@apollo/client';
 import { GET_USER_PROFILE } from '../graphql/queries';
 import { UPDATE_USER_PROFILE, CHANGE_PASSWORD } from '../graphql/mutations';
-import { Typography, Paper, Grid, TextField, Button } from '@mui/material';
+import { Typography, Paper, Grid, TextField, Button, FormControl, InputLabel, Select, MenuItem, Switch, FormControlLabel } from '@mui/material';
 
 const Settings = () => {
   const [userId, setUserId] = useState(null);
@@ -25,6 +25,8 @@ const Settings = () => {
   const [email, setEmail] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [language, setLanguage] = useState('en');
+  const [privacyEnabled, setPrivacyEnabled] = useState(false);
 
   React.useEffect(() => {
     if (data && data.me) {
@@ -55,6 +57,21 @@ const Settings = () => {
     }
   };
 
+  const handleLanguageChange = (event) => {
+    setLanguage(event.target.value);
+    // TODO: Implement actual language change logic
+  };
+
+  const handlePrivacyToggle = () => {
+    setPrivacyEnabled(!privacyEnabled);
+    // TODO: Implement actual privacy settings update
+  };
+
+  const handleExportData = () => {
+    // TODO: Implement actual data export logic
+    alert('Your data export has been initiated. You will receive an email with the download link shortly.');
+  };
+
   if (loading) return <Typography>Loading...</Typography>;
   if (error) return <Typography color="error">Error: {error.message}</Typography>;
 
@@ -83,6 +100,48 @@ const Settings = () => {
             Update Profile
           </Button>
         </Grid>
+        <Grid item xs={12}>
+          <Typography variant="h6">Language Preference</Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <FormControl fullWidth>
+            <InputLabel>Language</InputLabel>
+            <Select
+              value={language}
+              onChange={handleLanguageChange}
+            >
+              <MenuItem value="en">English</MenuItem>
+              <MenuItem value="es">Español</MenuItem>
+              <MenuItem value="fr">Français</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+
+        <Grid item xs={12}>
+          <Typography variant="h6">Privacy Settings</Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={privacyEnabled}
+                onChange={handlePrivacyToggle}
+                color="primary"
+              />
+            }
+            label="Enable enhanced privacy mode"
+          />
+        </Grid>
+
+        <Grid item xs={12}>
+          <Typography variant="h6">Export Data</Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <Button variant="contained" color="secondary" onClick={handleExportData}>
+            Export My Data
+          </Button>
+        </Grid>
+
         <Grid item xs={12}>
           <Typography variant="h6">Change Password</Typography>
         </Grid>

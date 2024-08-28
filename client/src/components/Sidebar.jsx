@@ -43,7 +43,7 @@ const Sidebar = ({ isOpen }) => {
     {
       text: 'Reports',
       icon: <AssessmentIcon />,
-      path: '/reports',
+      path: '/dashboard',
       subItems: [
         { text: 'Monthly Report', path: '/reports/monthly' },
         { text: 'Annual Summary', path: '/reports/annual' },
@@ -51,7 +51,7 @@ const Sidebar = ({ isOpen }) => {
       ],
     },
     { text: 'Credit Cards', icon: <CreditCardIcon />, path: '/credit-cards' },
-    { text: 'Notifications', icon: <NotificationsIcon />, path: '/notifications' },
+    
     { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
     { text: 'Help & Support', icon: <HelpIcon />, path: '/help' },
   ];
