@@ -3,19 +3,19 @@ import { createTheme, responsiveFontSizes } from '@mui/material/styles';
 const baseTheme = createTheme({
   palette: {
     primary: {
-      main: '#3f51b5',
-      light: '#757de8',
-      dark: '#002984',
+      main: '#8A2BE2', // Bright purple
+      light: '#9D4EDD',
+      dark: '#6A0DAD',
       contrastText: '#ffffff',
     },
     secondary: {
-      main: '#f50057',
-      light: '#ff4081',
-      dark: '#c51162',
+      main: '#FF69B4', // Hot pink
+      light: '#FFB6C1',
+      dark: '#C71585',
       contrastText: '#ffffff',
     },
     background: {
-      default: '#f5f5f5',
+      default: '#F0F0F0', // Light gray background
       paper: '#ffffff',
     },
     text: {
@@ -25,35 +25,13 @@ const baseTheme = createTheme({
   },
   typography: {
     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-    h1: {
-      fontWeight: 700,
-      fontSize: '2.5rem',
-    },
-    h2: {
-      fontWeight: 600,
-      fontSize: '2rem',
-    },
-    h3: {
-      fontWeight: 600,
-      fontSize: '1.75rem',
-    },
     h4: {
       fontWeight: 600,
       fontSize: '1.5rem',
     },
-    h5: {
-      fontWeight: 600,
-      fontSize: '1.25rem',
-    },
     h6: {
       fontWeight: 600,
-      fontSize: '1rem',
-    },
-    body1: {
-      fontSize: '1rem',
-    },
-    body2: {
-      fontSize: '0.875rem',
+      fontSize: '1.1rem',
     },
   },
   components: {
@@ -63,6 +41,7 @@ const baseTheme = createTheme({
           borderRadius: 8,
           textTransform: 'none',
           fontWeight: 600,
+          padding: '8px 16px',
         },
       },
     },
@@ -70,14 +49,21 @@ const baseTheme = createTheme({
       styleOverrides: {
         root: {
           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-          borderRadius: 8,
+          borderRadius: 12,
         },
       },
     },
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: 8,
+          borderRadius: 12,
+        },
+      },
+    },
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
         },
       },
     },

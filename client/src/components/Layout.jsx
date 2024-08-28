@@ -12,7 +12,7 @@ const drawerWidth = 240;
 const Root = styled('div')(({ theme }) => ({
   display: 'flex',
   minHeight: '100vh',
-  backgroundColor: theme.palette.background.default,
+  background: theme.palette.background.default,
 }));
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(

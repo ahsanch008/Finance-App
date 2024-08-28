@@ -37,7 +37,7 @@ export const GET_SAVINGS_GOALS = gql`
       name
       targetAmount
       currentAmount
-      deadline
+      targetDate
       progress
       createdAt
       updatedAt
@@ -52,9 +52,9 @@ export const GET_SAVINGS_GOAL = gql`
       name
       targetAmount
       currentAmount
-      deadline
       progress
-      createdAt
+      targetDate
+      createdAt 
       updatedAt
     }
   }
@@ -201,7 +201,7 @@ export const GET_MONTHLY_REPORT = gql`
   }
 `;
 export const GET_DASHBOARD_DATA = gql`
-  query GetDashboardData {
+  query GetDashboardData($currentYear: Int!, $currentMonth: Int!) {
     me {
       id
       name
@@ -227,6 +227,17 @@ export const GET_DASHBOARD_DATA = gql`
       limit
       spent
     }
+    getMonthlyReport(year: $currentYear, month: $currentMonth) {
+      month
+      year
+      totalIncome
+      totalExpenses
+      netSavings
+      categoryBreakdown {
+        category
+        amount
+      }
+    }
   }
 `;
 export const GET_ACCOUNTS = gql`
@@ -241,4 +252,43 @@ export const GET_ACCOUNTS = gql`
     }
   }
 `;
-// Add more queries as needed
+export const GET_PLAID_LINK_TOKEN = gql`
+  query GetPlaidLinkToken {
+    getPlaidLinkToken {
+      link_token
+    }
+  }
+`;
+
+export const GET_PLAID_ACCOUNTS = gql`
+  query GetPlaidAccounts {
+    getPlaidAccounts {
+      id
+      name
+      type
+      subtype
+      mask
+      balances {
+        available
+        current
+        limit
+        isoCurrencyCode
+      }
+    }
+  }
+`;
+
+export const GET_PLAID_TRANSACTIONS = gql`
+  query GetPlaidTransactions($startDate: String!, $endDate: String!) {
+    getPlaidTransactions(startDate: $startDate, endDate: $endDate) {
+      id
+      accountId
+      amount
+      date
+      name
+      merchantName
+      category
+      pending
+    }
+  }
+`;

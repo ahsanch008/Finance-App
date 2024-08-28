@@ -18,7 +18,11 @@ const Budget = sequelize.define('Budget', {
   period: {
     type: DataTypes.ENUM('weekly', 'monthly', 'yearly'),
     allowNull: false
-  }
+  },
+  limit: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false
+  },
 });
 
 module.exports = Budget;

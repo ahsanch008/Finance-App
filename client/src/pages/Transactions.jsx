@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
-import { GET_TRANSACTIONS } from '../graphql/queries';
+import { GET_TRANSACTIONS, GET_PLAID_TRANSACTIONS } from '../graphql/queries';
 import { CREATE_TRANSACTION } from '../graphql/mutations';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Box } from '@mui/material';
 
 const Transactions = () => {
   const [open, setOpen] = useState(false);
   const [newTransaction, setNewTransaction] = useState({ amount: '', category: '', description: '' });
-  const { loading, error, data, refetch } = useQuery(GET_TRANSACTIONS);
+  const { loading: manualLoading, error: manualError, data: manualData, refetch: refetchManual } = useQuery(GET_TRANSACTIONS);
+  const { loading: plaidLoading, error: plaidError, data: plaidData } = useQuery(GET_PLAID_TRANSACTIONS, {
+    variables: {
+      startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days ago
+      endDate: new Date().toISOString().split('T')[0], // today
+    },
+  });
   const [createTransaction] = useMutation(CREATE_TRANSACTION);
 
   const handleClickOpen = () => {
@@ -33,21 +39,27 @@ const Transactions = () => {
           } 
         } 
       });
-      refetch();
+      refetchManual();
       handleClose();
     } catch (err) {
       console.error('Error creating transaction:', err);
     }
   };
 
-  if (loading) return <Typography>Loading...</Typography>;
-  if (error) return <Typography color="error">Error: {error.message}</Typography>;
+  if (manualLoading || plaidLoading) return <Typography>Loading...</Typography>;
+  if (manualError) return <Typography color="error">Error loading manual transactions: {manualError.message}</Typography>;
+  if (plaidError) return <Typography color="error">Error loading Plaid transactions: {plaidError.message}</Typography>;
+
+  const allTransactions = [
+    ...(manualData?.getTransactions || []),
+    ...(plaidData?.getPlaidTransactions || []),
+  ].sort((a, b) => new Date(b.date) - new Date(a.date));
 
   return (
-    <div>
+    <Box>
       <Typography variant="h4" gutterBottom>Transactions</Typography>
-      <Button variant="contained" color="primary" onClick={handleClickOpen}>
-        Add Transaction
+      <Button variant="contained" color="primary" onClick={handleClickOpen} sx={{ mb: 2 }}>
+        Add Manual Transaction
       </Button>
       <TableContainer component={Paper}>
         <Table>
@@ -57,15 +69,17 @@ const Transactions = () => {
               <TableCell>Description</TableCell>
               <TableCell>Category</TableCell>
               <TableCell align="right">Amount</TableCell>
+              <TableCell>Source</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {data.getTransactions.map((transaction) => (
+            {allTransactions.map((transaction) => (
               <TableRow key={transaction.id}>
                 <TableCell>{new Date(transaction.date).toLocaleDateString()}</TableCell>
-                <TableCell>{transaction.description}</TableCell>
+                <TableCell>{transaction.description || transaction.name}</TableCell>
                 <TableCell>{transaction.category}</TableCell>
-                <TableCell align="right">${transaction.amount.toFixed(2)}</TableCell>
+                <TableCell align="right">${Math.abs(transaction.amount).toFixed(2)}</TableCell>
+                <TableCell>{transaction.accountId ? 'Plaid' : 'Manual'}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -108,7 +122,7 @@ const Transactions = () => {
           <Button onClick={handleSubmit}>Add</Button>
         </DialogActions>
       </Dialog>
-    </div>
+    </Box>
   );
 };
 

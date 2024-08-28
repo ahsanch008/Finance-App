@@ -57,6 +57,7 @@ const typeDefs = gql`
     name: String!
     targetAmount: Float!
     currentAmount: Float!
+    targetDate: String
     progress: Float
     user: User!
     createdAt: String!
@@ -67,15 +68,13 @@ const typeDefs = gql`
     id: ID!
     category: String!
     limit: Float
-    spent: Float
-    period: BudgetPeriod!
-    user: User!
+    spent: Float!
+    period: String!
     createdAt: String!
     updatedAt: String!
   }
 
   enum BudgetPeriod {
-    DAILY
     WEEKLY
     MONTHLY
     YEARLY
@@ -125,6 +124,11 @@ const typeDefs = gql`
     limit: Float!
     period: BudgetPeriod!
   }
+     type ExchangeTokenResult {
+    success: Boolean!
+    accessToken: String
+    message: String
+  }
 
   type Query {
     me: User
@@ -170,10 +174,15 @@ const typeDefs = gql`
     updateInvestment(id: ID!, input: InvestmentInput!): Investment!
     deleteInvestment(id: ID!): Boolean!
     createCharge(amount: Float!, currency: String!, cardId: ID!): Boolean!
-    
+      exchangePlaidPublicToken(publicToken: String!): ExchangeTokenResult!
 
     addTransactionCategory(name: String!): Boolean!
     
+    getPlaidLinkToken: PlaidLinkTokenResponse!
+  }
+
+  type PlaidLinkTokenResponse {
+    link_token: String!
   }
 
   type TransactionConnection {
@@ -245,6 +254,49 @@ const typeDefs = gql`
       sortOrder: String
     ): TransactionConnection!
   }
+    type PlaidLinkToken {
+  expiration: String!
+  link_token: String!
+  request_id: String!
+}
+
+type PlaidAccount {
+  id: ID!
+  name: String!
+  type: String!
+  subtype: String
+  mask: String
+  balances: PlaidAccountBalance!
+}
+
+type PlaidAccountBalance {
+  available: Float
+  current: Float
+  limit: Float
+  isoCurrencyCode: String
+  unofficialCurrencyCode: String
+}
+
+type PlaidTransaction {
+  id: ID!
+  accountId: String!
+  amount: Float!
+  date: String!
+  name: String!
+  merchantName: String
+  category: [String]
+  pending: Boolean!
+}
+
+extend type Query {
+  getPlaidLinkToken: PlaidLinkToken!
+  getPlaidAccounts: [PlaidAccount!]!
+  getPlaidTransactions(startDate: String!, endDate: String!): [PlaidTransaction!]!
+}
+
+extend type Mutation {
+  exchangePlaidPublicToken(publicToken: String!): ExchangeTokenResult!
+}
 `;
 
 module.exports = typeDefs;

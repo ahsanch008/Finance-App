@@ -3,12 +3,23 @@ import { useQuery } from '@apollo/client';
 import { Typography, List, ListItem, ListItemText, LinearProgress, CircularProgress } from '@mui/material';
 import { GET_SAVINGS_GOALS } from '../graphql/queries';
 
-const SavingsGoals = ({savingsGoals}) => {
-  const { loading, error, data } = useQuery(GET_SAVINGS_GOALS);
+const SavingsGoals = () => {
+  const { loading, error, data } = useQuery(GET_SAVINGS_GOALS, {
+    onError: (error) => {
+      console.error('GraphQL error:', error);
+      console.error('GraphQL error details:', error.graphQLErrors);
+      console.error('Network error details:', error.networkError);
+    }
+  });
 
   if (loading) return <CircularProgress />;
   if (error) return <Typography color="error">Error: {error.message}</Typography>;
-  if (!savingsGoals || savingsGoals.length === 0) {
+  
+  console.log('GraphQL data:', data); // Add this line for debugging
+
+  const savingsGoals = data?.getSavingsGoals || [];
+  
+  if (savingsGoals.length === 0) {
     return <Typography>No savings goals available.</Typography>;
   }
 
@@ -16,7 +27,7 @@ const SavingsGoals = ({savingsGoals}) => {
     <>
       <Typography variant="h6" gutterBottom>Savings Goals</Typography>
       <List>
-        {data.getSavingsGoals.map((goal) => (
+        {savingsGoals.map((goal) => (
           <ListItem key={goal.id}>
             <ListItemText
               primary={goal.name}

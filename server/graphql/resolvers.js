@@ -1,4 +1,4 @@
-const { AuthenticationError, UserInputError, ForbiddenError } = require('apollo-server-express');
+const { AuthenticationError, UserInputError, ForbiddenError, ApolloError } = require('apollo-server-express');
 const authService = require('../services/authService');
 const userService = require('../services/userService');
 const savingsGoalService = require('../services/savingGoalService');
@@ -10,6 +10,7 @@ const investmentService = require('../services/investmentService');
 const { authorize } = require('../middlewares/auth');
 const { Transaction, Account } = require('../models');
 const { Op } = require('sequelize');
+const plaidService = require('../services/plaidService');
 
 const resolvers = {
   Query: {
@@ -19,14 +20,14 @@ const resolvers = {
     user: authorize()(async (_, { id }) => {
       return await userService.getUser(id);
     }),
-    getSavingsGoals: authorize()(async (_, __, { user }) => {
+    getSavingsGoals: authorize()(async (_, __, { user}) => {
       return await savingsGoalService.getSavingsGoals(user.id);
     }),
-    getSavingsGoal: authorize()(async (_, { id }, { user }) => {
-      const goal = await savingsGoalService.getSavingsGoal(id);
-      if (goal.userId !== user.id) throw new ForbiddenError('Not authorized to view this savings goal');
-      return goal;
-    }),
+    // getSavingsGoal: authorize()(async (_, { id }, { user }) => {
+    //   const goal = await savingsGoalService.getSavingsGoal(id);
+    //   if (goal.userId !== user.id) throw new ForbiddenError('Not authorized to view this savings goal');
+    //   return goal;
+    // }),
     getCards: authorize()(async (_, __, { user }) => {
       return await cardService.getCards(user.id);
     }),
@@ -34,10 +35,24 @@ const resolvers = {
       return await transactionService.getTransactions(user.id, startDate, endDate, category, limit);
     }),
     getBudgets: authorize()(async (_, __, { user }) => {
-      return await budgetService.getBudgets(user.id);
+      try {
+        const budgets = await budgetService.getBudgets(user.id);
+        return budgets.filter(budget => budget && budget.id != null).map(budget => ({
+          id: budget.id,
+          category: budget.category,
+          limit: budget.limit,
+          spent: 0, // You'll need to calculate this
+          period: budget.period,
+          createdAt: budget.createdAt,
+          updatedAt: budget.updatedAt
+        }));
+      } catch (error) {
+        console.error('Error fetching budgets:', error);
+        throw new ApolloError('Failed to fetch budgets', 'BUDGET_FETCH_ERROR');
+      }
     }),
     getBudget: authorize()(async (_, { id }, { user }) => {
-      const budget = await budgetService.getBudget(id);
+      const budget = await budgetService.getBudgets(id);
       if (budget.userId !== user.id) throw new ForbiddenError('Not authorized to view this budget');
       return budget;
     }),
@@ -65,14 +80,14 @@ const resolvers = {
       });
 
       const totalIncome = transactions
-        .filter(t => t.amount > 0)
-        .reduce((sum, t) => sum + t.amount, 0);
+    .filter(t => t.type === 'income')
+    .reduce((sum, t) => sum + parseFloat(t.amount), 0);
 
-      const totalExpenses = transactions
-        .filter(t => t.amount < 0)
-        .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  const totalExpenses = transactions
+    .filter(t => t.type === 'expense')
+    .reduce((sum, t) => sum + parseFloat(t.amount), 0);
 
-      const netSavings = totalIncome - totalExpenses;
+  const netSavings = totalIncome - totalExpenses;
 
       const categoryBreakdown = transactions.reduce((acc, t) => {
         if (!acc[t.category]) acc[t.category] = 0;
@@ -83,9 +98,9 @@ const resolvers = {
       return {
         month,
         year,
-        totalIncome,
-        totalExpenses,
-        netSavings,
+        totalIncome: parseFloat(totalIncome.toFixed(2)),
+        totalExpenses: parseFloat(totalExpenses.toFixed(2)),
+        netSavings: parseFloat(netSavings.toFixed(2)),
         categoryBreakdown: Object.entries(categoryBreakdown).map(([category, amount]) => ({
           category,
           amount
@@ -143,6 +158,40 @@ const resolvers = {
         },
         totalCount: count
       };
+    },
+    getPlaidLinkToken: async (_, __, { user }) => {
+      if (!user) {
+        throw new AuthenticationError('You must be logged in to create a Plaid link token');
+      }
+      try {
+        const linkToken = await plaidService.createLinkToken(user.id);
+        return linkToken;
+      } catch (error) {
+        console.error('Error creating Plaid link token:', error);
+        throw new Error('Failed to create Plaid link token');
+      }
+    },
+    getPlaidAccounts: async (_, __, { user }) => {
+      if (!user) {
+        throw new AuthenticationError('You must be logged in to view accounts');
+      }
+      const { accounts, error } = await plaidService.getAccounts(user.id);
+      if (error) {
+        console.error('Error fetching Plaid accounts:', error);
+        return [];
+      }
+      return accounts;
+    },
+    getPlaidTransactions: async (_, { startDate, endDate }, { user }) => {
+      if (!user) {
+        throw new AuthenticationError('You must be logged in to view transactions');
+      }
+      const { transactions, error } = await plaidService.getTransactions(user.id, startDate, endDate);
+      if (error) {
+        console.error('Error fetching Plaid transactions:', error);
+        return [];
+      }
+      return transactions;
     },
   },
   SavingsGoal: {
@@ -332,7 +381,21 @@ const resolvers = {
         throw new UserInputError(error.message);
       }
     }),
+    exchangePlaidPublicToken: async (_, { publicToken }, { req, res }) => {
+      try {
+        const result = await plaidService.exchangePublicToken(publicToken, req, res);
+        console.log('Exchange result:', result);
+        return result;
+      } catch (error) {
+        console.error('Error exchanging Plaid public token:', error);
+        throw new ApolloError('Failed to exchange Plaid public token', 'PLAID_API_ERROR', {
+          message: error.message,
+          stack: error.stack
+        });
+      }
+    },
   },
+  
 };
 
 

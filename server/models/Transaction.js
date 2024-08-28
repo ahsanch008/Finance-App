@@ -24,7 +24,7 @@ const Transaction = sequelize.define('Transaction', {
     defaultValue: DataTypes.NOW
   },
   type: {
-    type: DataTypes.STRING,
+    type: DataTypes.ENUM( 'Income', 'Expense'),
     allowNull: true
   }
 });

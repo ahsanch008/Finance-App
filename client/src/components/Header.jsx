@@ -12,10 +12,8 @@ import { styled } from '@mui/material/styles';
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
   zIndex: theme.zIndex.drawer + 1,
-  backgroundColor: theme.palette.background.paper,
-  color: theme.palette.text.primary,
-  boxShadow: 'none',
-  borderBottom: `1px solid ${theme.palette.divider}`,
+  backgroundColor: theme.palette.primary.main,
+  color: theme.palette.primary.contrastText,
 }));
 
 const StyledModal = styled(Modal)(({ theme }) => ({
@@ -95,7 +93,7 @@ const Header = ({ open, handleDrawerOpen }) => {
 
   return (
     <>
-      <StyledAppBar position="fixed">
+      <StyledAppBar position="fixed" open={open}>
         <Toolbar>
           <IconButton
             color="inherit"
@@ -106,13 +104,13 @@ const Header = ({ open, handleDrawerOpen }) => {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
             Finance App
           </Typography>
           {isAuthenticated ? (
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               {user && user.name && (
-                <Avatar sx={{ mr: 2 }}>{user.name[0]}</Avatar>
+                <Avatar sx={{ mr: 2, bgcolor: 'secondary.main' }}>{user.name[0]}</Avatar>
               )}
               <Button color="inherit" onClick={() => navigate('/profile')}>Profile</Button>
               <Button color="inherit" onClick={handleLogout}>Logout</Button>

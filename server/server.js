@@ -30,10 +30,10 @@ app.use(cors({
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  context: async ({ req,res }) => {
+  context: async ({ req, res }) => {
     const token = req.headers.authorization || '';
     const user = await verifyToken(token);
-    return { user };
+    return { user, req, res };
   },
   formatError: (error) => {
     logger.error(error);

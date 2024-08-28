@@ -262,5 +262,9 @@ export const GET_DASHBOARD_DATA = gql`
     }
   }
 `;
-
+export const EXCHANGE_PLAID_PUBLIC_TOKEN = gql`
+  mutation ExchangePlaidPublicToken($publicToken: String!) {
+    exchangePlaidPublicToken(publicToken: $publicToken)
+  }
+`;
 // Add more mutations as needed
