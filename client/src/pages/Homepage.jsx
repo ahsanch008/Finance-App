@@ -1,9 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
-import { Typography, Button, Grid, Container, Box } from '@mui/material';
+import { Typography, Button, Grid, Container, Box, Paper, useTheme, useMediaQuery } from '@mui/material';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import SecurityIcon from '@mui/icons-material/Security';
 
 const StyledContainer = styled('div')(({ theme }) => ({
   root: {
@@ -28,12 +31,26 @@ const StyledContainer = styled('div')(({ theme }) => ({
     padding: theme.spacing(10, 0),
     backgroundColor: theme.palette.background.paper,
   },
+  featureIcon: {
+    fontSize: 48,
+    color: theme.palette.primary.main,
+    marginBottom: theme.spacing(2),
+  },
   content: {
     flexGrow: 1,
   },
 }));
 
 const HomePage = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const features = [
+    { icon: AccountBalanceWalletIcon, title: 'Expense Tracking', description: 'Easily track and categorize your expenses' },
+    { icon: TimelineIcon, title: 'Budget Planning', description: 'Set and manage budgets to reach your financial goals' },
+    { icon: SecurityIcon, title: 'Secure & Private', description: 'Your financial data is encrypted and secure' },
+  ];
+
   return (
     <StyledContainer>
       <Box className="root">
@@ -41,7 +58,7 @@ const HomePage = () => {
         <main className="content">
           <Box className="hero">
             <Container className="heroContent">
-              <Typography component="h1" variant="h2" gutterBottom>
+              <Typography component="h1" variant="h2" gutterBottom fontWeight="bold">
                 Welcome to Finance App
               </Typography>
               <Typography variant="h5" paragraph>
@@ -66,7 +83,23 @@ const HomePage = () => {
             </Container>
           </Box>
           <Box className="features">
-            {/* Add feature section content here */}
+            <Container>
+              <Grid container spacing={4}>
+                {features.map((feature, index) => (
+                  <Grid item xs={12} sm={4} key={index}>
+                    <Paper elevation={3} sx={{ p: 3, height: '100%', textAlign: 'center' }}>
+                      <feature.icon className="featureIcon" />
+                      <Typography variant="h5" component="h3" gutterBottom fontWeight="bold">
+                        {feature.title}
+                      </Typography>
+                      <Typography variant="body1" color="text.secondary">
+                        {feature.description}
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                ))}
+              </Grid>
+            </Container>
           </Box>
         </main>
         <Footer />

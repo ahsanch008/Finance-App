@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import { useQuery } from '@apollo/client';
 import { GET_INVESTMENTS, GET_TRANSACTIONS } from '../graphql/queries';
-import { CircularProgress, Typography, Box } from '@mui/material';
+import { CircularProgress, Typography, Box, Paper, useTheme, useMediaQuery } from '@mui/material';
+import ShowChartIcon from '@mui/icons-material/ShowChart';
 import {
 	Chart as ChartJS,
 	CategoryScale,
@@ -28,15 +29,13 @@ ChartJS.register(
 const InvestmentChart = () => {
 	const [chartData, setChartData] = useState(null);
 	const { loading: investmentsLoading, error: investmentsError, data: investmentsData } = useQuery(GET_INVESTMENTS);
-	
 	const { loading: transactionsLoading, error: transactionsError, data: transactionsData } = useQuery(GET_TRANSACTIONS);
-	
+	const theme = useTheme();
+	const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
 	useEffect(() => {
 		if (investmentsData && transactionsData) {
-			
 			const processedData = processData(investmentsData.getInvestments, transactionsData.getTransactions);
-			
 			setChartData(processedData);
 		}
 	}, [investmentsData, transactionsData]);
@@ -80,7 +79,6 @@ const InvestmentChart = () => {
 			return runningTotal;
 		});
 
-
 		return {
 			labels,
 			datasets: [
@@ -97,15 +95,17 @@ const InvestmentChart = () => {
 
 	const chartOptions = {
 		responsive: true,
+		maintainAspectRatio: false,
 		plugins: {
 			legend: {
 				position: 'top',
 			},
 			title: {
 				display: true,
-				text: 'Portfolio Performance Over Time',
+				text: '',
 				font: {
-					size: 18,
+					size: isMobile ? 16 : 18,
+					weight: 'bold',
 				},
 			},
 			tooltip: {
@@ -120,13 +120,16 @@ const InvestmentChart = () => {
 					display: true,
 					text: 'Date',
 					font: {
-						size: 14,
+						size: isMobile ? 12 : 14,
 						weight: 'bold',
 					},
 				},
 				ticks: {
 					maxRotation: 45,
 					minRotation: 45,
+					font: {
+						size: isMobile ? 10 : 12,
+					},
 				},
 			},
 			y: {
@@ -134,29 +137,65 @@ const InvestmentChart = () => {
 					display: true,
 					text: 'Portfolio Value ($)',
 					font: {
-						size: 14,
+						size: isMobile ? 12 : 14,
 						weight: 'bold',
 					},
 				},
 				ticks: {
 					callback: (value) => `$${value.toLocaleString()}`,
+					font: {
+						size: isMobile ? 10 : 12,
+					},
 				},
 				beginAtZero: true,
 			},
 		},
 	};
 
-	if (investmentsLoading || transactionsLoading) return <CircularProgress />;
-	if (investmentsError) return <Typography color="error">Error loading investments: {investmentsError.message}</Typography>;
-	if (transactionsError) return <Typography color="error">Error loading transactions: {transactionsError.message}</Typography>;
-	if (!chartData) return <Typography>Processing data...</Typography>;
-	if (chartData.labels.length === 0) return <Typography>No data available for the chart</Typography>;
+	if (investmentsLoading || transactionsLoading) {
+		return (
+			<Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+				<CircularProgress />
+			</Box>
+		);
+	}
+
+	if (investmentsError || transactionsError) {
+		return (
+			<Paper elevation={3} sx={{ p: 3, bgcolor: 'error.light', color: 'error.contrastText' }}>
+				<Typography variant="h6" gutterBottom>Error loading data</Typography>
+				<Typography>{investmentsError?.message || transactionsError?.message}</Typography>
+			</Paper>
+		);
+	}
+
+	if (!chartData) {
+		return (
+			<Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+				<Typography>Processing data...</Typography>
+			</Box>
+		);
+	}
+
+	if (chartData.labels.length === 0) {
+		return (
+			<Paper elevation={3} sx={{ p: 3 }}>
+				<Typography variant="h6" gutterBottom>No data available</Typography>
+				<Typography>There is no investment or transaction data to display in the chart.</Typography>
+			</Paper>
+		);
+	}
 
 	return (
-		<Box sx={{ width: '100%', maxWidth: 800, margin: 'auto', padding: 2 }}>
-			<Typography variant="h5" gutterBottom align="center">Portfolio Performance</Typography>
-			<Line data={chartData} options={chartOptions} />
-		</Box>
+		<Paper elevation={3} sx={{ p: 3, width: '100%', maxWidth: 800, margin: 'auto' }}>
+			<Box display="flex" alignItems="center" mb={2}>
+				<ShowChartIcon sx={{ fontSize: 28, color: 'primary.main', mr: 1 }} />
+				<Typography variant="h5" color="primary">Portfolio Performance</Typography>
+			</Box>
+			<Box sx={{ height: isMobile ? 300 : 400 }}>
+				<Line data={chartData} options={chartOptions} />
+			</Box>
+		</Paper>
 	);
 };
 

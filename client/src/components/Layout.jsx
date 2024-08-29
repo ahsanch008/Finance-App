@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Box, CssBaseline, Drawer, IconButton, useMediaQuery } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, CssBaseline, Drawer, IconButton, useMediaQuery, Toolbar } from '@mui/material';
 import { styled, useTheme } from '@mui/material/styles';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -16,7 +16,7 @@ const Root = styled('div')(({ theme }) => ({
 }));
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
-  ({ theme, open }) => ({
+  ({ theme, open, isMobile }) => ({
     flexGrow: 1,
     padding: theme.spacing(3),
     transition: theme.transitions.create('margin', {
@@ -24,7 +24,7 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
       duration: theme.transitions.duration.leavingScreen,
     }),
     marginLeft: 0,
-    ...(open && {
+    ...(open && !isMobile && {
       transition: theme.transitions.create('margin', {
         easing: theme.transitions.easing.easeOut,
         duration: theme.transitions.duration.enteringScreen,
@@ -47,6 +47,10 @@ const Layout = ({ children }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [open, setOpen] = useState(!isMobile);
 
+  useEffect(() => {
+    setOpen(!isMobile);
+  }, [isMobile]);
+
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -58,7 +62,7 @@ const Layout = ({ children }) => {
   return (
     <Root>
       <CssBaseline />
-      <Header open={open} handleDrawerOpen={handleDrawerOpen} />
+      <Header open={open} handleDrawerOpen={handleDrawerOpen} handleDrawerClose={handleDrawerClose} />
       <Drawer
         sx={{
           width: drawerWidth,
@@ -80,11 +84,11 @@ const Layout = ({ children }) => {
             <ChevronLeftIcon />
           </IconButton>
         </DrawerHeader>
-        <Sidebar />
+        <Sidebar isOpen={open} />
       </Drawer>
-      <Main open={open}>
-        <DrawerHeader />
-        <Box sx={{ maxWidth: 1200, margin: '0 auto' }}>
+      <Main open={open} isMobile={isMobile}>
+        <Toolbar /> {/* This pushes the content below the app bar */}
+        <Box sx={{ maxWidth: 1200, margin: '0 auto', pb: 8 }}> {/* Added padding bottom for footer */}
           {children}
         </Box>
       </Main>

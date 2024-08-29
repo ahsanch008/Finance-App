@@ -2,10 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useMutation, useQuery } from '@apollo/client';
 import { GET_USER_PROFILE } from '../graphql/queries';
 import { UPDATE_USER_PROFILE, CHANGE_PASSWORD } from '../graphql/mutations';
-import { Typography, Paper, Grid, TextField, Button, FormControl, InputLabel, Select, MenuItem, Switch, FormControlLabel } from '@mui/material';
+import { Typography, Paper, Grid, TextField, Button, FormControl, InputLabel, Select, MenuItem, Switch, FormControlLabel, Box, Divider, CircularProgress, Alert, useTheme, useMediaQuery } from '@mui/material';
+import SettingsIcon from '@mui/icons-material/Settings';
+import LanguageIcon from '@mui/icons-material/Language';
+import SecurityIcon from '@mui/icons-material/Security';
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
+import LockIcon from '@mui/icons-material/Lock';
 
 const Settings = () => {
   const [userId, setUserId] = useState(null);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     const storedUserId = localStorage.getItem('userId');
@@ -16,7 +23,7 @@ const Settings = () => {
 
   const { loading, error, data } = useQuery(GET_USER_PROFILE, {
     variables: { id: userId },
-    skip: !userId, // Skip the query if userId is not available
+    skip: !userId,
   });
   const [updateProfile] = useMutation(UPDATE_USER_PROFILE);
   const [changePassword] = useMutation(CHANGE_PASSWORD);
@@ -27,8 +34,9 @@ const Settings = () => {
   const [newPassword, setNewPassword] = useState('');
   const [language, setLanguage] = useState('en');
   const [privacyEnabled, setPrivacyEnabled] = useState(false);
+  const [updateStatus, setUpdateStatus] = useState(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (data && data.me) {
       setName(data.me.name);
       setEmail(data.me.email);
@@ -38,22 +46,22 @@ const Settings = () => {
   const handleUpdateProfile = async () => {
     try {
       await updateProfile({ variables: { name } });
-      alert('Profile updated successfully');
+      setUpdateStatus({ type: 'success', message: 'Profile updated successfully' });
     } catch (err) {
       console.error('Error updating profile:', err);
-      alert('Error updating profile');
+      setUpdateStatus({ type: 'error', message: 'Error updating profile' });
     }
   };
 
   const handleChangePassword = async () => {
     try {
       await changePassword({ variables: { currentPassword, newPassword } });
-      alert('Password changed successfully');
+      setUpdateStatus({ type: 'success', message: 'Password changed successfully' });
       setCurrentPassword('');
       setNewPassword('');
     } catch (err) {
       console.error('Error changing password:', err);
-      alert('Error changing password');
+      setUpdateStatus({ type: 'error', message: 'Error changing password' });
     }
   };
 
@@ -69,15 +77,18 @@ const Settings = () => {
 
   const handleExportData = () => {
     // TODO: Implement actual data export logic
-    alert('Your data export has been initiated. You will receive an email with the download link shortly.');
+    setUpdateStatus({ type: 'info', message: 'Your data export has been initiated. You will receive an email with the download link shortly.' });
   };
 
-  if (loading) return <Typography>Loading...</Typography>;
-  if (error) return <Typography color="error">Error: {error.message}</Typography>;
+  if (loading) return <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px"><CircularProgress /></Box>;
+  if (error) return <Alert severity="error">Error: {error.message}</Alert>;
 
   return (
-    <Paper style={{ padding: '20px' }}>
-      <Typography variant="h4" gutterBottom>Settings</Typography>
+    <Paper elevation={3} sx={{ p: 3 }}>
+      <Box display="flex" alignItems="center" mb={2}>
+        <SettingsIcon sx={{ fontSize: 28, color: 'primary.main', mr: 1 }} />
+        <Typography variant="h4" color="primary">Settings</Typography>
+      </Box>
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <TextField
@@ -100,8 +111,14 @@ const Settings = () => {
             Update Profile
           </Button>
         </Grid>
+
+        <Grid item xs={12}><Divider sx={{ my: 2 }} /></Grid>
+
         <Grid item xs={12}>
-          <Typography variant="h6">Language Preference</Typography>
+          <Box display="flex" alignItems="center" mb={1}>
+            <LanguageIcon sx={{ fontSize: 24, color: 'primary.main', mr: 1 }} />
+            <Typography variant="h6">Language Preference</Typography>
+          </Box>
         </Grid>
         <Grid item xs={12}>
           <FormControl fullWidth>
@@ -117,8 +134,13 @@ const Settings = () => {
           </FormControl>
         </Grid>
 
+        <Grid item xs={12}><Divider sx={{ my: 2 }} /></Grid>
+
         <Grid item xs={12}>
-          <Typography variant="h6">Privacy Settings</Typography>
+          <Box display="flex" alignItems="center" mb={1}>
+            <SecurityIcon sx={{ fontSize: 24, color: 'primary.main', mr: 1 }} />
+            <Typography variant="h6">Privacy Settings</Typography>
+          </Box>
         </Grid>
         <Grid item xs={12}>
           <FormControlLabel
@@ -133,17 +155,27 @@ const Settings = () => {
           />
         </Grid>
 
+        <Grid item xs={12}><Divider sx={{ my: 2 }} /></Grid>
+
         <Grid item xs={12}>
-          <Typography variant="h6">Export Data</Typography>
+          <Box display="flex" alignItems="center" mb={1}>
+            <CloudDownloadIcon sx={{ fontSize: 24, color: 'primary.main', mr: 1 }} />
+            <Typography variant="h6">Export Data</Typography>
+          </Box>
         </Grid>
         <Grid item xs={12}>
-          <Button variant="contained" color="secondary" onClick={handleExportData}>
+          <Button variant="contained" color="secondary" onClick={handleExportData} startIcon={<CloudDownloadIcon />}>
             Export My Data
           </Button>
         </Grid>
 
+        <Grid item xs={12}><Divider sx={{ my: 2 }} /></Grid>
+
         <Grid item xs={12}>
-          <Typography variant="h6">Change Password</Typography>
+          <Box display="flex" alignItems="center" mb={1}>
+            <LockIcon sx={{ fontSize: 24, color: 'primary.main', mr: 1 }} />
+            <Typography variant="h6">Change Password</Typography>
+          </Box>
         </Grid>
         <Grid item xs={12}>
           <TextField
@@ -169,6 +201,11 @@ const Settings = () => {
           </Button>
         </Grid>
       </Grid>
+      {updateStatus && (
+        <Alert severity={updateStatus.type} sx={{ mt: 2 }}>
+          {updateStatus.message}
+        </Alert>
+      )}
     </Paper>
   );
 };

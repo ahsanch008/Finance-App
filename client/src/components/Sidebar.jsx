@@ -1,5 +1,5 @@
-import React from 'react';
-import { List, ListItem, ListItemIcon, ListItemText, ListItemButton, Collapse } from '@mui/material';
+import React, { useState } from 'react';
+import { List, ListItem, ListItemIcon, ListItemText, ListItemButton, Collapse, Box, Tooltip } from '@mui/material';
 import { Link, useLocation } from 'react-router-dom';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
@@ -17,20 +17,28 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import HelpIcon from '@mui/icons-material/Help';
 
 const StyledListItemButton = styled(ListItemButton)(({ theme }) => ({
+  borderRadius: theme.shape.borderRadius,
   '&.Mui-selected': {
-    backgroundColor: theme.palette.action.selected,
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.primary.contrastText,
     '&:hover': {
-      backgroundColor: theme.palette.action.hover,
+      backgroundColor: theme.palette.primary.dark,
     },
+    '& .MuiListItemIcon-root': {
+      color: theme.palette.primary.contrastText,
+    },
+  },
+  '&:hover': {
+    backgroundColor: theme.palette.action.hover,
   },
 }));
 
 const Sidebar = ({ isOpen }) => {
   const location = useLocation();
-  const [open, setOpen] = React.useState(true);
+  const [openSubMenu, setOpenSubMenu] = useState('');
 
-  const handleClick = () => {
-    setOpen(!open);
+  const handleSubMenuClick = (text) => {
+    setOpenSubMenu(openSubMenu === text ? '' : text);
   };
 
   const menuItems = [
@@ -43,51 +51,51 @@ const Sidebar = ({ isOpen }) => {
     {
       text: 'Reports',
       icon: <AssessmentIcon />,
-      path: '/dashboard',
       subItems: [
         { text: 'Monthly Report', path: '/reports/monthly' },
         { text: 'Annual Summary', path: '/reports/annual' },
-       
       ],
     },
     { text: 'Credit Cards', icon: <CreditCardIcon />, path: '/credit-cards' },
-    
     { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
     { text: 'Help & Support', icon: <HelpIcon />, path: '/help' },
   ];
 
   return (
-    <List>
+    <List component="nav" sx={{ p: 2 }}>
       {menuItems.map((item) => (
-        <React.Fragment key={item.text}>
-          <StyledListItemButton
-            component={Link}
-            to={item.path}
-            selected={location.pathname === item.path}
-            onClick={item.subItems ? handleClick : undefined}
-          >
-            <ListItemIcon>{item.icon}</ListItemIcon>
-            <ListItemText primary={item.text} />
-            {item.subItems && (open ? <ExpandLess /> : <ExpandMore />)}
-          </StyledListItemButton>
+        <Box key={item.text} sx={{ mb: 1 }}>
+          <Tooltip title={isOpen ? '' : item.text} placement="right" arrow>
+            <StyledListItemButton
+              component={Link}
+              to={item.path}
+              selected={location.pathname === item.path || (item.subItems && item.subItems.some(subItem => location.pathname === subItem.path))}
+              onClick={item.subItems ? () => handleSubMenuClick(item.text) : undefined}
+            >
+              <ListItemIcon>{item.icon}</ListItemIcon>
+              {isOpen && <ListItemText primary={item.text} />}
+              {item.subItems && isOpen && (openSubMenu === item.text ? <ExpandLess /> : <ExpandMore />)}
+            </StyledListItemButton>
+          </Tooltip>
           {item.subItems && (
-            <Collapse in={open} timeout="auto" unmountOnExit>
+            <Collapse in={openSubMenu === item.text && isOpen} timeout="auto" unmountOnExit>
               <List component="div" disablePadding>
                 {item.subItems.map((subItem) => (
-                  <StyledListItemButton
-                    key={subItem.text}
-                    component={Link}
-                    to={subItem.path}
-                    selected={location.pathname === subItem.path}
-                    sx={{ pl: 4 }}
-                  >
-                    <ListItemText primary={subItem.text} />
-                  </StyledListItemButton>
+                  <Tooltip key={subItem.text} title={isOpen ? '' : subItem.text} placement="right" arrow>
+                    <StyledListItemButton
+                      component={Link}
+                      to={subItem.path}
+                      selected={location.pathname === subItem.path}
+                      sx={{ pl: 4 }}
+                    >
+                      {isOpen && <ListItemText primary={subItem.text} />}
+                    </StyledListItemButton>
+                  </Tooltip>
                 ))}
               </List>
             </Collapse>
           )}
-        </React.Fragment>
+        </Box>
       ))}
     </List>
   );

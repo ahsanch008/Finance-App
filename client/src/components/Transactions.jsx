@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { GET_TRANSACTIONS, GET_PLAID_TRANSACTIONS } from '../graphql/queries';
 import { CREATE_TRANSACTION } from '../graphql/mutations';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Box } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Box, CircularProgress, Alert, IconButton, Tooltip } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import ReceiptIcon from '@mui/icons-material/Receipt';
 
 const Transactions = () => {
   const [open, setOpen] = useState(false);
@@ -22,6 +24,7 @@ const Transactions = () => {
 
   const handleClose = () => {
     setOpen(false);
+    setNewTransaction({ amount: '', category: '', description: '' });
   };
 
   const handleInputChange = (e) => {
@@ -46,9 +49,8 @@ const Transactions = () => {
     }
   };
 
-  if (manualLoading || plaidLoading) return <Typography>Loading...</Typography>;
-  if (manualError) return <Typography color="error">Error loading manual transactions: {manualError.message}</Typography>;
-  if (plaidError) return <Typography color="error">Error loading Plaid transactions: {plaidError.message}</Typography>;
+  if (manualLoading || plaidLoading) return <Box display="flex" justifyContent="center" alignItems="center" height="200px"><CircularProgress /></Box>;
+  if (manualError || plaidError) return <Alert severity="error">Error loading transactions: {manualError?.message || plaidError?.message}</Alert>;
 
   const allTransactions = [
     ...(manualData?.getTransactions || []),
@@ -57,11 +59,15 @@ const Transactions = () => {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>Transactions</Typography>
-      <Button variant="contained" color="primary" onClick={handleClickOpen} sx={{ mb: 2 }}>
-        Add Manual Transaction
-      </Button>
-      <TableContainer component={Paper}>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+        <Typography variant="h4">Transactions</Typography>
+        <Tooltip title="Add Manual Transaction">
+          <IconButton color="primary" onClick={handleClickOpen}>
+            <AddIcon />
+          </IconButton>
+        </Tooltip>
+      </Box>
+      <TableContainer component={Paper} elevation={3}>
         <Table>
           <TableHead>
             <TableRow>
@@ -74,12 +80,21 @@ const Transactions = () => {
           </TableHead>
           <TableBody>
             {allTransactions.map((transaction) => (
-              <TableRow key={transaction.id}>
+              <TableRow key={transaction.id} hover>
                 <TableCell>{new Date(transaction.date).toLocaleDateString()}</TableCell>
                 <TableCell>{transaction.description || transaction.name}</TableCell>
                 <TableCell>{transaction.category}</TableCell>
-                <TableCell align="right">${Math.abs(transaction.amount).toFixed(2)}</TableCell>
-                <TableCell>{transaction.accountId ? 'Plaid' : 'Manual'}</TableCell>
+                <TableCell align="right" sx={{ color: transaction.amount < 0 ? 'error.main' : 'success.main', fontWeight: 'bold' }}>
+                  ${Math.abs(transaction.amount).toFixed(2)}
+                </TableCell>
+                <TableCell>
+                  <Tooltip title={transaction.accountId ? 'Plaid Transaction' : 'Manual Transaction'}>
+                    <Box component="span" sx={{ display: 'flex', alignItems: 'center' }}>
+                      <ReceiptIcon sx={{ mr: 1, color: transaction.accountId ? 'primary.main' : 'secondary.main' }} />
+                      {transaction.accountId ? 'Plaid' : 'Manual'}
+                    </Box>
+                  </Tooltip>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -119,7 +134,7 @@ const Transactions = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleSubmit}>Add</Button>
+          <Button onClick={handleSubmit} variant="contained" color="primary">Add</Button>
         </DialogActions>
       </Dialog>
     </Box>

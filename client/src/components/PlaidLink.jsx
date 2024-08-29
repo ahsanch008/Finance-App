@@ -1,10 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { usePlaidLink } from 'react-plaid-link';
 import { useMutation, useQuery } from '@apollo/client';
-import { Button, Typography, Box, CircularProgress } from '@mui/material';
+import { Button, Typography, Box, CircularProgress, Paper, Alert, useTheme, useMediaQuery } from '@mui/material';
 import { GET_PLAID_LINK_TOKEN } from '../graphql/queries';
 import { EXCHANGE_PLAID_PUBLIC_TOKEN } from '../graphql/mutations';
 import Cookies from 'js-cookie';
+import LinkIcon from '@mui/icons-material/Link';
+import UpdateIcon from '@mui/icons-material/Update';
 
 const PlaidLink = () => {
   const [linkToken, setLinkToken] = useState(null);
@@ -12,6 +14,8 @@ const PlaidLink = () => {
   const [exchangePublicToken] = useMutation(EXCHANGE_PLAID_PUBLIC_TOKEN);
   const [linkStatus, setLinkStatus] = useState('');
   const [isLinkOpening, setIsLinkOpening] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     if (data?.getPlaidLinkToken) {
@@ -25,21 +29,19 @@ const PlaidLink = () => {
         const { data } = await exchangePublicToken({ 
           variables: { publicToken: public_token }
         });
-        console.log('Exchange result:', data);
         if (data.exchangePlaidPublicToken.success) {
           Cookies.set('plaidAccessToken', data.exchangePlaidPublicToken.accessToken, { 
             expires: 30, 
             secure: true 
           });
-          console.log('Account successfully linked!', data);
-          setLinkStatus('Account successfully linked!');
+          setLinkStatus('success');
         } else {
-          setLinkStatus('Error linking account. Please try again.');
+          setLinkStatus('error');
         }
         setIsLinkOpening(false);
       } catch (error) {
         console.error('Error exchanging public token:', error);
-        setLinkStatus('Error linking account. Please try again.');
+        setLinkStatus('error');
         setIsLinkOpening(false);
       }
     },
@@ -64,34 +66,50 @@ const PlaidLink = () => {
     }
   };
 
-  if (loading) return <CircularProgress />;
-  if (error) return <Typography color="error">Error: {error.message}</Typography>;
+  if (loading) return (
+    <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+      <CircularProgress />
+    </Box>
+  );
+
+  if (error) return (
+    <Alert severity="error" sx={{ mt: 2 }}>
+      Error: {error.message}
+    </Alert>
+  );
+
+  const isLinked = Cookies.get('plaidAccessToken');
 
   return (
-    <Box>
-      <Button 
-        onClick={handleOpen} 
-        disabled={!ready || isLinkOpening} 
-        variant="contained" 
-        color="primary"
-        sx={{ mb: 2 }}
-      >
-        {Cookies.get('plaidAccessToken') ? 'Update Plaid Link' : 'Link Bank Account'}
-      </Button>
-      {linkStatus && (
-        <Typography color={linkStatus.includes('Error') ? 'error' : 'success'} sx={{ mb: 2 }}>
-          {linkStatus}
+    <Paper elevation={3} sx={{ p: 3, maxWidth: 400, margin: 'auto' }}>
+      <Box display="flex" flexDirection="column" alignItems="center">
+        <Button 
+          onClick={handleOpen} 
+          disabled={!ready || isLinkOpening} 
+          variant="contained" 
+          color="primary"
+          startIcon={isLinked ? <UpdateIcon /> : <LinkIcon />}
+          sx={{ mb: 2, width: isMobile ? '100%' : 'auto' }}
+        >
+          {isLinked ? 'Update Plaid Link' : 'Link Bank Account'}
+        </Button>
+        {linkStatus && (
+          <Alert severity={linkStatus} sx={{ mb: 2, width: '100%' }}>
+            {linkStatus === 'success' ? 'Account successfully linked!' : 'Error linking account. Please try again.'}
+          </Alert>
+        )}
+        <Typography variant="body2" align="center" sx={{ mb: 2 }}>
+          {isLinked 
+            ? 'Your Plaid account is linked. Click the button above to update or relink.'
+            : 'Click to link a Bank Account and view updated real time data.'}
         </Typography>
-      )}
-      <Typography variant="body2">
-        {Cookies.get('plaidAccessToken') 
-          ? 'Your Plaid account is linked. Click the button above to update or relink.'
-          : 'Click to link a Bank Account and view updated real time data.'}
-      </Typography>
-      <Typography variant="body2" sx={{ mt: 2 }}>
-        Note: No Bank Account is linked. Please link your account to view updated transactions and summary.
-      </Typography>
-    </Box>
+        {!isLinked && (
+          <Alert severity="info" sx={{ width: '100%' }}>
+            No Bank Account is linked. Please link your account to view updated transactions and summary.
+          </Alert>
+        )}
+      </Box>
+    </Paper>
   );
 };
 

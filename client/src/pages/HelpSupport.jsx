@@ -9,7 +9,9 @@ import {
   Button,
   TextField,
   Grid,
-  Paper
+  Paper,
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import EmailIcon from '@mui/icons-material/Email';
@@ -17,6 +19,9 @@ import ChatIcon from '@mui/icons-material/Chat';
 import PhoneIcon from '@mui/icons-material/Phone';
 
 const HelpSupport = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   const faqs = [
     { 
       question: 'How do I link my bank account?', 
@@ -39,17 +44,25 @@ const HelpSupport = () => {
   return (
     <Container maxWidth="md">
       <Box my={4}>
-        <Typography variant="h4" component="h1" gutterBottom>
+        <Typography variant="h4" component="h1" gutterBottom fontWeight="bold" color="primary" textAlign="center">
           Help & Support
         </Typography>
         
-        <Typography variant="h6" gutterBottom>
+        <Typography variant="h5" gutterBottom mt={4} fontWeight="medium" color="text.secondary">
           Frequently Asked Questions
         </Typography>
         {faqs.map((faq, index) => (
-          <Accordion key={index}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography>{faq.question}</Typography>
+          <Accordion key={index} sx={{ mb: 1, '&:before': { display: 'none' }, boxShadow: 1 }}>
+            <AccordionSummary 
+              expandIcon={<ExpandMoreIcon />}
+              sx={{ 
+                '&.Mui-expanded': { 
+                  minHeight: 48,
+                  bgcolor: 'primary.light',
+                },
+              }}
+            >
+              <Typography fontWeight="medium">{faq.question}</Typography>
             </AccordionSummary>
             <AccordionDetails>
               <Typography>{faq.answer}</Typography>
@@ -57,86 +70,84 @@ const HelpSupport = () => {
           </Accordion>
         ))}
 
-        <Box mt={4}>
-          <Typography variant="h6" gutterBottom>
+        <Box mt={6}>
+          <Typography variant="h5" gutterBottom fontWeight="medium" color="text.secondary">
             Can't find what you're looking for?
           </Typography>
-          <Typography gutterBottom>
+          <Typography gutterBottom variant="body1">
             Our support team is here to help. Choose your preferred method of contact:
           </Typography>
           
           <Grid container spacing={3} mt={2}>
-            <Grid item xs={12} sm={4}>
-              <Paper elevation={3} sx={{ p: 2, textAlign: 'center' }}>
-                <EmailIcon color="primary" fontSize="large" />
-                <Typography variant="h6" mt={1}>Email Support</Typography>
-                <Button 
-                  variant="contained" 
-                  color="primary" 
-                  href="mailto:support@financeapp.com"
-                  sx={{ mt: 2 }}
-                >
-                  Contact Us
-                </Button>
-              </Paper>
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <Paper elevation={3} sx={{ p: 2, textAlign: 'center' }}>
-                <ChatIcon color="primary" fontSize="large" />
-                <Typography variant="h6" mt={1}>Live Chat</Typography>
-                <Button 
-                  variant="contained" 
-                  color="primary"
-                  sx={{ mt: 2 }}
-                >
-                  Start Chat
-                </Button>
-              </Paper>
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <Paper elevation={3} sx={{ p: 2, textAlign: 'center' }}>
-                <PhoneIcon color="primary" fontSize="large" />
-                <Typography variant="h6" mt={1}>Phone Support</Typography>
-                <Typography variant="body1" mt={1}>1-800-123-4567</Typography>
-                <Typography variant="body2">Mon-Fri, 9am-5pm EST</Typography>
-              </Paper>
-            </Grid>
+            {[
+              { icon: EmailIcon, title: 'Email Support', action: 'Contact Us', href: 'mailto:support@financeapp.com' },
+              { icon: ChatIcon, title: 'Live Chat', action: 'Start Chat' },
+              { icon: PhoneIcon, title: 'Phone Support', phone: '1-800-123-4567', hours: 'Mon-Fri, 9am-5pm EST' }
+            ].map((item, index) => (
+              <Grid item xs={12} sm={4} key={index}>
+                <Paper elevation={3} sx={{ p: 3, textAlign: 'center', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <Box>
+                    <item.icon color="primary" sx={{ fontSize: 40, mb: 1 }} />
+                    <Typography variant="h6" fontWeight="medium">{item.title}</Typography>
+                    {item.phone && (
+                      <>
+                        <Typography variant="body1" mt={1}>{item.phone}</Typography>
+                        <Typography variant="body2" color="text.secondary">{item.hours}</Typography>
+                      </>
+                    )}
+                  </Box>
+                  {item.action && (
+                    <Button 
+                      variant="contained" 
+                      color="primary" 
+                      href={item.href}
+                      sx={{ mt: 2, alignSelf: 'center' }}
+                    >
+                      {item.action}
+                    </Button>
+                  )}
+                </Paper>
+              </Grid>
+            ))}
           </Grid>
         </Box>
 
-        <Box mt={4}>
-          <Typography variant="h6" gutterBottom>
+        <Box mt={6}>
+          <Typography variant="h5" gutterBottom fontWeight="medium" color="text.secondary">
             Send us a message
           </Typography>
-          <form>
-            <TextField
-              fullWidth
-              label="Name"
-              margin="normal"
-              variant="outlined"
-            />
-            <TextField
-              fullWidth
-              label="Email"
-              margin="normal"
-              variant="outlined"
-            />
-            <TextField
-              fullWidth
-              label="Message"
-              margin="normal"
-              variant="outlined"
-              multiline
-              rows={4}
-            />
-            <Button 
-              variant="contained" 
-              color="primary" 
-              sx={{ mt: 2 }}
-            >
-              Send Message
-            </Button>
-          </form>
+          <Paper elevation={3} sx={{ p: 3, mt: 2 }}>
+            <form>
+              <TextField
+                fullWidth
+                label="Name"
+                margin="normal"
+                variant="outlined"
+              />
+              <TextField
+                fullWidth
+                label="Email"
+                margin="normal"
+                variant="outlined"
+              />
+              <TextField
+                fullWidth
+                label="Message"
+                margin="normal"
+                variant="outlined"
+                multiline
+                rows={4}
+              />
+              <Button 
+                variant="contained" 
+                color="primary" 
+                sx={{ mt: 2 }}
+                fullWidth={isMobile}
+              >
+                Send Message
+              </Button>
+            </form>
+          </Paper>
         </Box>
       </Box>
     </Container>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AppBar, Toolbar, Typography, IconButton, Button, Box, Modal, TextField, Divider, Avatar } from '@mui/material';
+import { AppBar, Toolbar, Typography, IconButton, Button, Box, Modal, TextField, Divider, Avatar, Tooltip } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import GoogleIcon from '@mui/icons-material/Google';
@@ -9,11 +9,13 @@ import { useMutation } from '@apollo/client';
 import { useGoogleLogin } from '@react-oauth/google';
 import { GOOGLE_LOGIN_MUTATION, LOGIN_MUTATION } from '../graphql/mutations';
 import { styled } from '@mui/material/styles';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
   zIndex: theme.zIndex.drawer + 1,
-  backgroundColor: theme.palette.primary.main,
+  background: 'linear-gradient(45deg, #1E88E5 30%, #64B5F6 90%)',
   color: theme.palette.primary.contrastText,
+  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
 }));
 
 const StyledModal = styled(Modal)(({ theme }) => ({
@@ -29,9 +31,13 @@ const ModalContent = styled(Box)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
   width: '100%',
   maxWidth: 400,
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    transform: 'scale(1.02)',
+  },
 }));
 
-const Header = ({ open, handleDrawerOpen }) => {
+const Header = ({ open, handleDrawerOpen, handleDrawerClose }) => {
   const { user, isAuthenticated, login, logout } = useAuth();
   const navigate = useNavigate();
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -48,7 +54,12 @@ const Header = ({ open, handleDrawerOpen }) => {
   };
 
   const handleLoginModalOpen = () => setLoginModalOpen(true);
-  const handleLoginModalClose = () => setLoginModalOpen(false);
+  const handleLoginModalClose = () => {
+    setLoginModalOpen(false);
+    setError('');
+    setEmail('');
+    setPassword('');
+  };
 
   const handleEmailLogin = async (e) => {
     e.preventDefault();
@@ -97,12 +108,12 @@ const Header = ({ open, handleDrawerOpen }) => {
         <Toolbar>
           <IconButton
             color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
+            aria-label="toggle drawer"
+            onClick={open ? handleDrawerClose : handleDrawerOpen}
             edge="start"
-            sx={{ mr: 2, ...(open && { display: 'none' }) }}
+            sx={{ mr: 2 }}
           >
-            <MenuIcon />
+            {open ? <ChevronLeftIcon /> : <MenuIcon />}
           </IconButton>
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
             Finance App
@@ -110,7 +121,11 @@ const Header = ({ open, handleDrawerOpen }) => {
           {isAuthenticated ? (
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               {user && user.name && (
-                <Avatar sx={{ mr: 2, bgcolor: 'secondary.main' }}>{user.name[0]}</Avatar>
+                <Tooltip title={user.name}>
+                  <Avatar sx={{ mr: 2, bgcolor: 'secondary.main', cursor: 'pointer' }} onClick={() => navigate('/profile')}>
+                    {user.name[0]}
+                  </Avatar>
+                </Tooltip>
               )}
               <Button color="inherit" onClick={() => navigate('/profile')}>Profile</Button>
               <Button color="inherit" onClick={handleLogout}>Logout</Button>
