@@ -17,12 +17,14 @@ This is the backend server for a comprehensive personal finance management appli
 - Stripe for payment processing
 - Nodemailer for email services
 - Winston for logging
+- Plaid for bank account integration
 
 ## Prerequisites
 
 - Node.js (v14 or later)
 - PostgreSQL
 - Stripe account (for payment processing)
+- Plaid account (for bank account integration)
 
 ## Installation
 
@@ -47,6 +49,8 @@ This is the backend server for a comprehensive personal finance management appli
    DB_HOST=localhost
    JWT_SECRET=your_jwt_secret
    STRIPE_SECRET_KEY=your_stripe_secret_key
+   PLAID_CLIENT_ID=your_plaid_client_id
+   PLAID_SECRET=your_plaid_secret
    ```
 
 4. Set up the database:
@@ -73,165 +77,11 @@ The server will start on `http://localhost:3000` (or the port specified in your 
 
 The GraphQL API is available at `/graphql`. You can use tools like GraphQL Playground or Apollo Studio to explore and test the API.
 
-### Main Queries:
-
-- `me`: Get the current user's information
-- `transactions`: Get user transactions
-- `investments`: Get user investments
-- `savingsGoals`: Get user savings goals
-- `budgets`: Get user budgets
-- `cards`: Get user payment cards
-- `financialSummary`: Get a summary of the user's financial status
-
-### Main Mutations:
-
-- `register`: Register a new user
-- `login`: Log in a user
-- `createTransaction`: Create a new transaction
-- `createInvestment`: Create a new investment
-- `createSavingsGoal`: Create a new savings goal
-- `createBudget`: Create a new budget
-- `addCard`: Add a new payment card
-- `createCharge`: Process a payment
+### Main Queries and Mutations:
 
 For a full list of queries and mutations, refer to the GraphQL schema in:
 
-
-```3:134:server/graphql/schema.js
-const typeDefs = gql`
-  type User {
-    id: ID!
-    name: String!
-    email: String!
-    role: String!
-    transactions: [Transaction!]
-    investments: [Investment!]
-    savingsGoals: [SavingsGoal!]
-    budgets: [Budget!]
-    cards: [Card!]
-  }
-
-  type Transaction {
-    id: ID!
-    amount: Float!
-    category: String!
-    description: String
-    date: String!
-    user: User!
-  }
-
-  type Investment {
-    id: ID!
-    type: String!
-    amount: Float!
-    date: String!
-    currentValue: Float
-    user: User!
-  }
-
-  type SavingsGoal {
-    id: ID!
-    name: String!
-    targetAmount: Float!
-    currentAmount: Float!
-    targetDate: String!
-    progress: Float!
-    user: User!
-  }
-
-  type Budget {
-    id: ID!
-    category: String!
-    amount: Float!
-    period: String!
-    currentSpending: Float!
-    remainingAmount: Float!
-    user: User!
-  }
-
-  type Card {
-    id: ID!
-    last4: String!
-    brand: String!
-    user: User!
-  }
-
-  type AuthPayload {
-    token: String!
-    user: User!
-  }
-
-  type FinancialSummary {
-    totalIncome: Float!
-    totalExpenses: Float!
-    netSavings: Float!
-    investmentValue: Float!
-  }
-
-  input TransactionInput {
-    amount: Float!
-    category: String!
-    description: String
-    date: String
-  }
-
-  input InvestmentInput {
-    type: String!
-    amount: Float!
-    date: String
-  }
-
-  input SavingsGoalInput {
-    name: String!
-    targetAmount: Float!
-    targetDate: String!
-  }
-
-  input BudgetInput {
-    category: String!
-    amount: Float!
-    period: String!
-  }
-
-  type Query {
-    me: User
-    user(id: ID!): User
-    transaction(id: ID!): Transaction
-    transactions(startDate: String, endDate: String, category: String): [Transaction!]!
-    investment(id: ID!): Investment
-    investments(startDate: String, endDate: String, type: String): [Investment!]!
-    savingsGoal(id: ID!): SavingsGoal
-    savingsGoals: [SavingsGoal!]!
-    budget(id: ID!): Budget
-    budgets: [Budget!]!
-    card(id: ID!): Card
-    cards: [Card!]!
-    financialSummary(startDate: String, endDate: String): FinancialSummary!
-  }
-
-  type Mutation {
-    register(name: String!, email: String!, password: String!): AuthPayload!
-    login(email: String!, password: String!): AuthPayload!
-    updateUser(name: String, email: String, password: String): User!
-    createTransaction(input: TransactionInput!): Transaction!
-    updateTransaction(id: ID!, input: TransactionInput!): Transaction!
-    deleteTransaction(id: ID!): Boolean!
-    createInvestment(input: InvestmentInput!): Investment!
-    updateInvestment(id: ID!, input: InvestmentInput!): Investment!
-    deleteInvestment(id: ID!): Boolean!
-    createSavingsGoal(input: SavingsGoalInput!): SavingsGoal!
-    updateSavingsGoal(id: ID!, input: SavingsGoalInput!): SavingsGoal!
-    deleteSavingsGoal(id: ID!): Boolean!
-    createBudget(input: BudgetInput!): Budget!
-    updateBudget(id: ID!, input: BudgetInput!): Budget!
-    deleteBudget(id: ID!): Boolean!
-    addCard(token: String!): Card!
-    deleteCard(id: ID!): Boolean!
-    createCharge(amount: Float!, currency: String!, cardId: ID!): Boolean!
-  }
-`;
-```
-
+server/graphql/schema.js
 
 ## Authentication
 
@@ -265,4 +115,19 @@ Business logic is organized into service modules in the `services` directory. Th
 - `cardService`: Manages payment cards
 - `paymentService`: Processes payments using Stripe
 - `emailService`: Sends emails using Nodemailer
+- `plaidService`: Handles Plaid integration for bank account linking
 
+## Security
+
+- Rate limiting is implemented to prevent abuse of the API.
+- Passwords are hashed using bcrypt before storage.
+- Environment variables are used for sensitive information.
+
+## Additional Features
+
+- Google OAuth integration for user authentication
+- Plaid integration for bank account linking and transaction fetching
+- Monthly and annual financial reports generation
+
+For more details on specific components or services, refer to the corresponding files in the codebase.
+```

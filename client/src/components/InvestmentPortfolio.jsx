@@ -23,11 +23,11 @@ const InvestmentPortfolio = () => {
   );
 
   const totalValue = data?.getInvestments
-    ? data.getInvestments.reduce((sum, investment) => sum + (investment.currentValue || 0), 0)
+    ? data.getInvestments.reduce((sum, investment) => sum + (investment.amount || 0), 0)
     : 0;
 
   return (
-    <Paper elevation={3} sx={{ p: 3 }}>
+    <Paper elevation={3} sx={{ p: 2 }}>
       <Box display="flex" alignItems="center" mb={2}>
         <AccountBalanceIcon sx={{ fontSize: 28, color: 'primary.main', mr: 1 }} />
         <Typography variant="h6" color="primary">Investment Portfolio</Typography>

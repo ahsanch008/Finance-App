@@ -14,9 +14,8 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
 
-  // Get current month and year for the monthly summary
   const currentDate = new Date();
-  const currentMonth = currentDate.getMonth() + 1; // JavaScript months are 0-indexed
+  const currentMonth = currentDate.getMonth() + 1; 
   const currentYear = currentDate.getFullYear();
 
   const { loading: summaryLoading, error: summaryError, data: summaryData } = useQuery(GET_MONTHLY_REPORT, {
@@ -96,7 +95,6 @@ const Profile = () => {
         </Grid>
       </Grid>
 
-      {/* Monthly Summary Section */}
       <Box mt={4}>
         <Typography variant="h5" fontWeight="bold" color="primary" gutterBottom>
           Monthly Summary: {currentMonth.toString().padStart(2, '0')}/{currentYear}

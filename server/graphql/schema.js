@@ -37,8 +37,8 @@ const typeDefs = gql`
   }
 
   enum TransactionType {
-    INCOME
-    EXPENSE
+    Income
+    Expense
   }
 
   type Investment {
@@ -68,7 +68,7 @@ const typeDefs = gql`
     id: ID!
     category: String!
     limit: Float
-    spent: Float!
+    amount: Float!
     period: String!
     createdAt: String!
     updatedAt: String!

@@ -12,11 +12,20 @@ const Transactions = () => {
   const { loading: manualLoading, error: manualError, data: manualData, refetch: refetchManual } = useQuery(GET_TRANSACTIONS);
   const { loading: plaidLoading, error: plaidError, data: plaidData } = useQuery(GET_PLAID_TRANSACTIONS, {
     variables: {
-      startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days ago
+      startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], 
       endDate: new Date().toISOString().split('T')[0], // today
     },
   });
   const [createTransaction] = useMutation(CREATE_TRANSACTION);
+
+  const formatDate = (dateString) => {
+    const timestamp = Number(dateString);
+    if (!isNaN(timestamp)) {
+      return new Date(timestamp).toLocaleDateString();
+    } else {
+      return new Date(dateString).toLocaleDateString();
+    }
+  };
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -38,7 +47,7 @@ const Transactions = () => {
           input: {
             ...newTransaction,
             amount: parseFloat(newTransaction.amount),
-            date: new Date().toISOString()
+            date: Date.now().toString() 
           } 
         } 
       });
@@ -58,8 +67,8 @@ const Transactions = () => {
   ].sort((a, b) => new Date(b.date) - new Date(a.date));
 
   return (
-    <Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+    <Box justifyContent='center' >
+      <Box  display="flex" justifyContent="center" alignItems="center" mb={3}>
         <Typography variant="h4">Transactions</Typography>
         <Tooltip title="Add Manual Transaction">
           <IconButton color="primary" onClick={handleClickOpen}>
@@ -81,11 +90,18 @@ const Transactions = () => {
           <TableBody>
             {allTransactions.map((transaction) => (
               <TableRow key={transaction.id} hover>
-                <TableCell>{new Date(transaction.date).toLocaleDateString()}</TableCell>
+                <TableCell>{formatDate(transaction.date)}</TableCell>
                 <TableCell>{transaction.description || transaction.name}</TableCell>
                 <TableCell>{transaction.category}</TableCell>
-                <TableCell align="right" sx={{ color: transaction.amount < 0 ? 'error.main' : 'success.main', fontWeight: 'bold' }}>
-                  ${Math.abs(transaction.amount).toFixed(2)}
+                <TableCell 
+                  align="right" 
+                  sx={{ 
+                    color: transaction.type === 'Expense' ? 'error.main' : 'success.main', 
+                    fontWeight: 'bold',
+                    fontSize: '1.1em' 
+                  }}
+                >
+                  {transaction.type === 'Expense' ? '-' : '+'}${Math.abs(transaction.amount).toFixed(2)}
                 </TableCell>
                 <TableCell>
                   <Tooltip title={transaction.accountId ? 'Plaid Transaction' : 'Manual Transaction'}>

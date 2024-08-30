@@ -67,16 +67,13 @@ const Settings = () => {
 
   const handleLanguageChange = (event) => {
     setLanguage(event.target.value);
-    // TODO: Implement actual language change logic
   };
 
   const handlePrivacyToggle = () => {
     setPrivacyEnabled(!privacyEnabled);
-    // TODO: Implement actual privacy settings update
   };
 
   const handleExportData = () => {
-    // TODO: Implement actual data export logic
     setUpdateStatus({ type: 'info', message: 'Your data export has been initiated. You will receive an email with the download link shortly.' });
   };
 

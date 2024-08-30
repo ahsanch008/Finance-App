@@ -9,11 +9,9 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import { styled } from '@mui/material/styles';
-import SavingsIcon from '@mui/icons-material/Savings';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import CreditCardIcon from '@mui/icons-material/CreditCard';
 import GoalIcon from '@mui/icons-material/EmojiEvents';
-import NotificationsIcon from '@mui/icons-material/Notifications';
 import HelpIcon from '@mui/icons-material/Help';
 
 const StyledListItemButton = styled(ListItemButton)(({ theme }) => ({
@@ -30,6 +28,24 @@ const StyledListItemButton = styled(ListItemButton)(({ theme }) => ({
   },
   '&:hover': {
     backgroundColor: theme.palette.action.hover,
+  },
+}));
+
+const ScrollableBox = styled(Box)(({ theme }) => ({
+  height: 'calc(100vh - 64px)',
+  overflowY: 'auto',
+  '&::-webkit-scrollbar': {
+    width: '8px',
+  },
+  '&::-webkit-scrollbar-track': {
+    background: theme.palette.background.default,
+  },
+  '&::-webkit-scrollbar-thumb': {
+    background: theme.palette.primary.main,
+    borderRadius: '4px',
+  },
+  '&::-webkit-scrollbar-thumb:hover': {
+    background: theme.palette.primary.dark,
   },
 }));
 
@@ -62,42 +78,45 @@ const Sidebar = ({ isOpen }) => {
   ];
 
   return (
-    <List component="nav" sx={{ p: 2 }}>
-      {menuItems.map((item) => (
-        <Box key={item.text} sx={{ mb: 1 }}>
-          <Tooltip title={isOpen ? '' : item.text} placement="right" arrow>
-            <StyledListItemButton
-              component={Link}
-              to={item.path}
-              selected={location.pathname === item.path || (item.subItems && item.subItems.some(subItem => location.pathname === subItem.path))}
-              onClick={item.subItems ? () => handleSubMenuClick(item.text) : undefined}
-            >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              {isOpen && <ListItemText primary={item.text} />}
-              {item.subItems && isOpen && (openSubMenu === item.text ? <ExpandLess /> : <ExpandMore />)}
-            </StyledListItemButton>
-          </Tooltip>
-          {item.subItems && (
-            <Collapse in={openSubMenu === item.text && isOpen} timeout="auto" unmountOnExit>
-              <List component="div" disablePadding>
-                {item.subItems.map((subItem) => (
-                  <Tooltip key={subItem.text} title={isOpen ? '' : subItem.text} placement="right" arrow>
-                    <StyledListItemButton
-                      component={Link}
-                      to={subItem.path}
-                      selected={location.pathname === subItem.path}
-                      sx={{ pl: 4 }}
-                    >
-                      {isOpen && <ListItemText primary={subItem.text} />}
-                    </StyledListItemButton>
-                  </Tooltip>
-                ))}
-              </List>
-            </Collapse>
-          )}
-        </Box>
-      ))}
-    </List>
+    <ScrollableBox>
+      <List component="nav" sx={{ p: 2 }}>
+        {menuItems.map((item) => (
+          <Box key={item.text} sx={{ mb: 1 }}>
+            <Tooltip title={isOpen ? '' : item.text} placement="right" arrow>
+              <StyledListItemButton
+                component={Link}
+                to={item.path}
+                selected={location.pathname === item.path || (item.subItems && item.subItems.some(subItem => location.pathname === subItem.path))}
+                onClick={item.subItems ? () => handleSubMenuClick(item.text) : undefined}
+                sx={{ justifyContent: isOpen ? 'initial' : 'center' }}
+              >
+                <ListItemIcon sx={{ minWidth: isOpen ? 56 : 'auto', mr: isOpen ? 3 : 'auto' }}>{item.icon}</ListItemIcon>
+                {isOpen && <ListItemText primary={item.text} />}
+                {item.subItems && isOpen && (openSubMenu === item.text ? <ExpandLess /> : <ExpandMore />)}
+              </StyledListItemButton>
+            </Tooltip>
+            {item.subItems && (
+              <Collapse in={openSubMenu === item.text && isOpen} timeout="auto" unmountOnExit>
+                <List component="div" disablePadding>
+                  {item.subItems.map((subItem) => (
+                    <Tooltip key={subItem.text} title={isOpen ? '' : subItem.text} placement="right" arrow>
+                      <StyledListItemButton
+                        component={Link}
+                        to={subItem.path}
+                        selected={location.pathname === subItem.path}
+                        sx={{ pl: 4, justifyContent: isOpen ? 'initial' : 'center' }}
+                      >
+                        {isOpen && <ListItemText primary={subItem.text} />}
+                      </StyledListItemButton>
+                    </Tooltip>
+                  ))}
+                </List>
+              </Collapse>
+            )}
+          </Box>
+        ))}
+      </List>
+    </ScrollableBox>
   );
 };
 

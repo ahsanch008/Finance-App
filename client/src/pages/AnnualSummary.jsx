@@ -2,7 +2,27 @@ import React from 'react';
 import { useQuery } from '@apollo/client';
 import { Typography, Paper, Grid, List, ListItem, ListItemText, Box, Divider, useTheme, useMediaQuery, CircularProgress } from '@mui/material';
 import { Pie, Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import { GET_ANNUAL_SUMMARY } from '../graphql/queries';
+import { styled } from '@mui/material/styles';
+
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
+
+const StyledList = styled(List)(({ theme }) => ({
+  '&::-webkit-scrollbar': {
+    width: '8px',
+  },
+  '&::-webkit-scrollbar-track': {
+    background: theme.palette.background.default,
+  },
+  '&::-webkit-scrollbar-thumb': {
+    background: theme.palette.primary.main,
+    borderRadius: '4px',
+  },
+  '&::-webkit-scrollbar-thumb:hover': {
+    background: theme.palette.primary.dark,
+  },
+}));
 
 const AnnualSummary = ({ year }) => {
   const theme = useTheme();
@@ -16,21 +36,21 @@ const AnnualSummary = ({ year }) => {
 
   const { totalIncome, totalExpenses, netSavings, categoryBreakdown } = data.getAnnualSummary;
 
-  // Prepare data for Pie Chart
+
+  const remainingBalance = totalIncome - totalExpenses;
   const pieData = {
-    labels: ['Income', 'Expenses'],
+    labels: ['Remaining', 'Spent'],
     datasets: [
       {
-        data: [totalIncome, totalExpenses],
-        backgroundColor: [theme.palette.success.light, theme.palette.error.light],
-        borderColor: [theme.palette.success.main, theme.palette.error.main],
-        borderWidth: 2,
-        hoverBackgroundColor: [theme.palette.success.main, theme.palette.error.main],
+        data: [remainingBalance, totalExpenses],
+        backgroundColor: [theme.palette.primary.main, theme.palette.grey[300]],
+        borderColor: [theme.palette.primary.main, theme.palette.grey[300]],
+        borderWidth: 0,
       },
     ],
   };
 
-  // Prepare data for Bar Chart
+ 
   const barData = {
     labels: categoryBreakdown.map(item => item.category),
     datasets: [
@@ -45,7 +65,21 @@ const AnnualSummary = ({ year }) => {
     ],
   };
 
-  const chartOptions = {
+  const pieChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        enabled: false,
+      },
+    },
+    cutout: '75%',
+  };
+
+  const barChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -76,14 +110,18 @@ const AnnualSummary = ({ year }) => {
       <Divider sx={{ mb: 4 }} />
       <Grid container spacing={4}>
         <Grid item xs={12} md={6}>
-          <Box sx={{ height: { xs: 250, sm: 300 }, mb: 3 }}>
-            <Typography variant="h6" gutterBottom align="center" sx={{ fontWeight: 'medium' }}>Annual Income vs Expenses</Typography>
-            <Pie data={pieData} options={chartOptions} />
+          <Box sx={{ height: { xs: 250, sm: 300 }, mb: 3, position: 'relative' }}>
+            <Typography variant="h6" gutterBottom align="center" sx={{ fontWeight: 'medium' }}>Remaining Balance</Typography>
+            <Pie data={pieData} options={pieChartOptions} />
+            <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
+              <Typography variant="h4" color="primary" fontWeight="bold">${remainingBalance.toFixed(2)}</Typography>
+              <Typography variant="body2" color="text.secondary">Remaining</Typography>
+            </Box>
           </Box>
         </Grid>
         <Grid item xs={12} md={6}>
           <Box sx={{ height: { xs: 250, sm: 300 }, mb: 3 }}>
-            <Bar data={barData} options={chartOptions} />
+            <Bar data={barData} options={barChartOptions} />
           </Box>
         </Grid>
         <Grid item xs={12} md={6}>
@@ -124,7 +162,7 @@ const AnnualSummary = ({ year }) => {
         <Grid item xs={12} md={6}>
           <Paper elevation={2} sx={{ p: 3, borderRadius: 3, bgcolor: 'background.default', height: '100%' }}>
             <Typography variant="h6" gutterBottom color="primary" sx={{ fontWeight: 'bold', mb: 2 }}>Category Breakdown</Typography>
-            <List sx={{ maxHeight: 250, overflow: 'auto' }}>
+            <StyledList sx={{ maxHeight: 250, overflow: 'auto' }}>
               {categoryBreakdown.map((item, index) => (
                 <ListItem key={index} divider={index !== categoryBreakdown.length - 1} sx={{ py: 1 }}>
                   <ListItemText 
@@ -135,7 +173,7 @@ const AnnualSummary = ({ year }) => {
                   />
                 </ListItem>
               ))}
-            </List>
+            </StyledList>
           </Paper>
         </Grid>
       </Grid>

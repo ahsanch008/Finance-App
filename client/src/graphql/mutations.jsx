@@ -267,4 +267,3 @@ export const EXCHANGE_PLAID_PUBLIC_TOKEN = gql`
     exchangePlaidPublicToken(publicToken: $publicToken)
   }
 `;
-// Add more mutations as needed

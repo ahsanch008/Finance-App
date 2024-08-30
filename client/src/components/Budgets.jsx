@@ -34,7 +34,7 @@ const Budgets = () => {
   }
 
   return (
-    <Paper elevation={3} sx={{ p: 3 }}>
+    <Paper elevation={3} sx={{ p: 2 }}>
       <Box display="flex" alignItems="center" mb={2}>
         <AccountBalanceWalletIcon sx={{ fontSize: 28, color: 'primary.main', mr: 1 }} />
         <Typography variant="h6" color="primary">Budgets</Typography>
@@ -49,21 +49,21 @@ const Budgets = () => {
               </Box>
               <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
                 <Typography variant="body2">
-                  ${budget.spent.toFixed(2)} of ${budget.limit.toFixed(2)}
+                  ${budget.amount.toFixed(2)} of ${budget.limit.toFixed(2)}
                 </Typography>
-                <Typography variant="body2" color={budget.limit - budget.spent > 0 ? 'success.main' : 'error.main'} fontWeight="bold">
-                  ${(budget.limit - budget.spent).toFixed(2)} left
+                <Typography variant="body2" color={budget.limit - budget.amount > 0 ? 'success.main' : 'error.main'} fontWeight="bold">
+                  ${(budget.limit - budget.amount).toFixed(2)} left
                 </Typography>
               </Box>
               <LinearProgress
                 variant="determinate"
-                value={(budget.spent / budget.limit) * 100}
+                value={(budget.amount / budget.limit) * 100}
                 sx={{ 
                   height: 8, 
                   borderRadius: 4,
                   backgroundColor: theme.palette.grey[200],
                   '& .MuiLinearProgress-bar': {
-                    backgroundColor: (budget.spent / budget.limit) > 0.9 ? theme.palette.error.main : theme.palette.primary.main,
+                    backgroundColor: (budget.amount / budget.limit) > 0.9 ? theme.palette.error.main : theme.palette.primary.main,
                   }
                 }}
               />

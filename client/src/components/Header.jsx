@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { AppBar, Toolbar, Typography, IconButton, Button, Box, Modal, TextField, Divider, Avatar, Tooltip } from '@mui/material';
+import { AppBar, Toolbar, Typography, IconButton, Button, Box, Modal, TextField, Divider, Avatar, Tooltip, Paper } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import GoogleIcon from '@mui/icons-material/Google';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import LogoutIcon from '@mui/icons-material/Logout';
+import PersonIcon from '@mui/icons-material/Person';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
@@ -10,30 +12,21 @@ import { useGoogleLogin } from '@react-oauth/google';
 import { GOOGLE_LOGIN_MUTATION, LOGIN_MUTATION } from '../graphql/mutations';
 import { styled } from '@mui/material/styles';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-
+import AssuredWorkloadIcon from '@mui/icons-material/AssuredWorkload';
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
   zIndex: theme.zIndex.drawer + 1,
-  background: 'linear-gradient(45deg, #1E88E5 30%, #64B5F6 90%)',
+  background: 'linear-gradient(45deg, #6a11cb 30%, #8d4de2 90%)',
   color: theme.palette.primary.contrastText,
-  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
 }));
 
-const StyledModal = styled(Modal)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-}));
-
-const ModalContent = styled(Box)(({ theme }) => ({
-  backgroundColor: theme.palette.background.paper,
-  boxShadow: theme.shadows[5],
-  padding: theme.spacing(4),
+const StyledButton = styled(Button)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
-  width: '100%',
-  maxWidth: 400,
-  transition: 'all 0.3s ease',
+  textTransform: 'none',
+  fontWeight: 'bold',
   '&:hover': {
-    transform: 'scale(1.02)',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
 }));
 
@@ -113,8 +106,9 @@ const Header = ({ open, handleDrawerOpen, handleDrawerClose }) => {
             edge="start"
             sx={{ mr: 2 }}
           >
-            {open ? <ChevronLeftIcon /> : <MenuIcon />}
+            {open ? <MenuIcon /> : <MenuIcon />}
           </IconButton>
+          <AccountBalanceIcon sx={{ mr: 1 }} />
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
             Finance App
           </Typography>
@@ -127,75 +121,146 @@ const Header = ({ open, handleDrawerOpen, handleDrawerClose }) => {
                   </Avatar>
                 </Tooltip>
               )}
-              <Button color="inherit" onClick={() => navigate('/profile')}>Profile</Button>
-              <Button color="inherit" onClick={handleLogout}>Logout</Button>
+              <StyledButton 
+                color="inherit" 
+                onClick={() => navigate('/profile')}
+                sx={{ mr: 1 }}
+                startIcon={<PersonIcon />}
+              >
+                Profile
+              </StyledButton>
+              <StyledButton 
+                color="inherit" 
+                onClick={handleLogout}
+                startIcon={<LogoutIcon />}
+              >
+                Logout
+              </StyledButton>
             </Box>
           ) : (
-            <Button color="inherit" onClick={handleLoginModalOpen}>Login</Button>
+            <StyledButton 
+              color="inherit" 
+              onClick={handleLoginModalOpen}
+            >
+              Login
+            </StyledButton>
           )}
         </Toolbar>
       </StyledAppBar>
 
-      <StyledModal
+      <Modal
         open={loginModalOpen}
         onClose={handleLoginModalClose}
         aria-labelledby="login-modal-title"
         aria-describedby="login-modal-description"
       >
-        <ModalContent>
-          <Typography id="login-modal-title" variant="h6" component="h2" align="center" gutterBottom>
-            Sign in
-          </Typography>
-          <Box component="form" onSubmit={handleEmailLogin} sx={{ mt: 1 }}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
-              autoFocus
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '80%',
+            maxWidth: 800,
+            bgcolor: 'background.paper',
+            boxShadow: 24,
+            p: 0,
+            borderRadius: 2,
+            display: 'flex',
+          }}
+        >
+          <Box
+            sx={{
+              flex: 1,
+              bgcolor: 'primary.dark',
+              color: 'primary.contrastText',
+              p: 4,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+            }}
+          >
+            <AssuredWorkloadIcon sx={{ fontSize: 40, mb: 2 }} />
+            <Typography component="h1" variant="h4" gutterBottom>
+              Welcome to Finance App
+            </Typography>
+            <Typography variant="body1" paragraph>
+              Join our community to manage your finances, track expenses, and achieve your financial goals.
+            </Typography>
+            <Box component="ul" sx={{ pl: 2 }}>
+              <Typography component="li">Track your expenses</Typography>
+              <Typography component="li">Set and monitor budgets</Typography>
+              <Typography component="li">Analyze your spending habits</Typography>
+              <Typography component="li">Plan for your financial future</Typography>
+            </Box>
+          </Box>
+          <Box
+            sx={{
+              flex: 1,
+              p: 4,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+            }}
+          >
+            <Typography component="h2" variant="h5" align="center" gutterBottom>
+              Log in to your account
+            </Typography>
             <Button
-              type="submit"
               fullWidth
               variant="contained"
-              sx={{ mt: 3, mb: 2 }}
+              startIcon={<GoogleIcon />}
+              onClick={() => googleLogin()}
+              sx={{ mb: 2 }}
             >
-              Sign In
+              Continue with Google
             </Button>
-          </Box>
-          <Divider sx={{ my: 2 }}>OR</Divider>
-          <Button
-            fullWidth
-            variant="outlined"
-            startIcon={<GoogleIcon />}
-            onClick={() => googleLogin()}
-          >
-            Sign in with Google
-          </Button>
-          {error && (
-            <Typography color="error" align="center" sx={{ mt: 2 }}>
-              {error}
+            <Divider sx={{ my: 2 }}>OR</Divider>
+            <Box component="form" onSubmit={handleEmailLogin} noValidate>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="email"
+                label="Email Address"
+                name="email"
+                autoComplete="email"
+                autoFocus
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                name="password"
+                label="Password"
+                type="password"
+                id="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{ mt: 3, mb: 2 }}
+              >
+                Sign In
+              </Button>
+            </Box>
+            {error && (
+              <Typography color="error" align="center" sx={{ mt: 2 }}>
+                {error}
+              </Typography>
+            )}
+            <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 2 }}>
+              By logging in, you agree to our Terms of Service and Privacy Policy.
             </Typography>
-          )}
-        </ModalContent>
-      </StyledModal>
+          </Box>
+        </Box>
+      </Modal>
     </>
   );
 };

@@ -4,7 +4,7 @@ import Cookies from 'js-cookie';
 
 const httpLink = createHttpLink({
   uri: 'http://localhost:3000/graphql',
-  credentials: 'include' // adjust this to your GraphQL server URL
+  credentials: 'include' 
 });
 
 const authLink = setContext((_, { headers }) => {

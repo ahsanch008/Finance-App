@@ -41,7 +41,7 @@ const resolvers = {
           id: budget.id,
           category: budget.category,
           limit: budget.limit,
-          spent: 0, // You'll need to calculate this
+          amount: budget.amount,// You'll need to calculate this
           period: budget.period,
           createdAt: budget.createdAt,
           updatedAt: budget.updatedAt
@@ -80,11 +80,11 @@ const resolvers = {
       });
 
       const totalIncome = transactions
-    .filter(t => t.type === 'income')
+    .filter(t => t.type === 'Income')
     .reduce((sum, t) => sum + parseFloat(t.amount), 0);
 
   const totalExpenses = transactions
-    .filter(t => t.type === 'expense')
+    .filter(t => t.type === 'Expense')
     .reduce((sum, t) => sum + parseFloat(t.amount), 0);
 
   const netSavings = totalIncome - totalExpenses;
@@ -123,11 +123,11 @@ const resolvers = {
       });
 
       const totalIncome = transactions
-        .filter(t => t.type === 'income')
+        .filter(t => t.type === 'Income')
         .reduce((sum, t) => sum + parseFloat(t.amount), 0);
 
       const totalExpenses = transactions
-        .filter(t => t.type === 'expense')
+        .filter(t => t.type === 'Expense')
         .reduce((sum, t) => sum + parseFloat(t.amount), 0);
 
       const netSavings = totalIncome - totalExpenses;

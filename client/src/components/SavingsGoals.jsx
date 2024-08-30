@@ -41,7 +41,7 @@ const SavingsGoals = () => {
   }
 
   return (
-    <Paper elevation={3} sx={{ p: 3 }}>
+    <Paper elevation={3} sx={{ p: 2 }}>
       <Box display="flex" alignItems="center" mb={2}>
         <SavingsIcon sx={{ fontSize: 28, color: 'primary.main', mr: 1 }} />
         <Typography variant="h6" color="primary">Savings Goals</Typography>
@@ -51,9 +51,7 @@ const SavingsGoals = () => {
           <ListItem key={goal.id} sx={{ flexDirection: 'column', alignItems: 'stretch', mb: 2 }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
               <Typography variant="subtitle1" fontWeight="medium">{goal.name}</Typography>
-              <Typography variant="body2" color="text.secondary">
-                Target: ${goal.targetAmount.toFixed(2)} by {new Date(goal.targetDate).toLocaleDateString()}
-              </Typography>
+              
             </Box>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
               <Typography variant="body2">

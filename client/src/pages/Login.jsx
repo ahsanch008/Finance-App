@@ -6,7 +6,8 @@ import { Button, Typography, Container, Box, TextField, Paper, Divider, Circular
 import { GOOGLE_LOGIN_MUTATION, LOGIN_MUTATION } from '../graphql/mutations';
 import { useAuth } from '../context/AuthContext';
 import GoogleIcon from '@mui/icons-material/Google';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import AssuredWorkloadIcon from '@mui/icons-material/AssuredWorkload';
+
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -66,23 +67,68 @@ const Login = () => {
   };
 
   return (
-    <Container component="main" maxWidth="xs">
+    <Container component="main" maxWidth="md">
       <Box
         sx={{
           marginTop: 8,
           display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
+          flexDirection: 'row',
+          alignItems: 'stretch',
+          bgcolor: 'background.paper',
+          borderRadius: 2,
+          boxShadow: 3,
+          overflow: 'hidden',
         }}
       >
-        <Paper elevation={3} sx={{ padding: 4, width: '100%' }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3 }}>
-            <LockOutlinedIcon sx={{ m: 1, bgcolor: 'secondary.main', color: 'white', borderRadius: '50%', p: 1 }} />
-            <Typography component="h1" variant="h5">
-              Sign in
-            </Typography>
+        <Box
+          sx={{
+            flex: 1,
+            bgcolor: 'primary.dark',
+            color: 'primary.contrastText',
+            p: 4,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+          }}
+        >
+          <AssuredWorkloadIcon sx={{ fontSize: 40, mb: 2 }} />
+          <Typography component="h1" variant="h4" gutterBottom>
+            Welcome to FinanceApp
+          </Typography>
+          <Typography variant="body1" paragraph>
+            Join our community to manage your finances, track expenses, and achieve your financial goals.
+          </Typography>
+          <Box component="ul" sx={{ pl: 2 }}>
+            <Typography component="li">Track your expenses</Typography>
+            <Typography component="li">Set and monitor budgets</Typography>
+            <Typography component="li">Analyze your spending habits</Typography>
+            <Typography component="li">Plan for your financial future</Typography>
           </Box>
-          <Box component="form" onSubmit={handleEmailLogin} sx={{ mt: 1 }}>
+        </Box>
+        <Box
+          sx={{
+            flex: 1,
+            p: 4,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+          }}
+        >
+          <Typography component="h2" variant="h5" align="center" gutterBottom>
+            Log in to your account
+          </Typography>
+          <Button
+            fullWidth
+            variant="contained"
+            startIcon={<GoogleIcon />}
+            onClick={() => handleGoogleLogin()}
+            disabled={isLoading}
+            sx={{ mb: 2 }}
+          >
+            Continue with Google
+          </Button>
+          <Divider sx={{ my: 2 }}>OR</Divider>
+          <Box component="form" onSubmit={handleEmailLogin} noValidate>
             <TextField
               margin="normal"
               required
@@ -117,16 +163,6 @@ const Login = () => {
               {isLoading ? <CircularProgress size={24} /> : 'Sign In'}
             </Button>
           </Box>
-          <Divider sx={{ my: 2 }}>OR</Divider>
-          <Button
-            fullWidth
-            variant="outlined"
-            startIcon={<GoogleIcon />}
-            onClick={() => handleGoogleLogin()}
-            disabled={isLoading}
-          >
-            Sign in with Google
-          </Button>
           {error && (
             <Typography color="error" align="center" sx={{ mt: 2 }}>
               {error}
@@ -142,7 +178,10 @@ const Login = () => {
               {"Don't have an account? Sign Up"}
             </Link>
           </Box>
-        </Paper>
+          <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 2 }}>
+            By logging in, you agree to our Terms of Service and Privacy Policy.
+          </Typography>
+        </Box>
       </Box>
     </Container>
   );

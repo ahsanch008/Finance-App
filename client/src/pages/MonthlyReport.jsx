@@ -2,8 +2,25 @@ import React from 'react';
 import { Typography, Paper, Grid, List, ListItem, ListItemText, Box, Divider, useTheme, useMediaQuery } from '@mui/material';
 import { Pie, Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
+import { styled } from '@mui/material/styles';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
+
+const StyledList = styled(List)(({ theme }) => ({
+  '&::-webkit-scrollbar': {
+    width: '8px',
+  },
+  '&::-webkit-scrollbar-track': {
+    background: theme.palette.background.default,
+  },
+  '&::-webkit-scrollbar-thumb': {
+    background: theme.palette.primary.main,
+    borderRadius: '4px',
+  },
+  '&::-webkit-scrollbar-thumb:hover': {
+    background: theme.palette.primary.dark,
+  },
+}));
 
 const MonthlyReport = ({ report }) => {
   const theme = useTheme();
@@ -11,22 +28,35 @@ const MonthlyReport = ({ report }) => {
   if (!report) return null;
 
   const { totalIncome, totalExpenses, netSavings, categoryBreakdown } = report;
+  const remainingBalance = totalIncome - totalExpenses;
 
-  // Prepare data for Pie Chart
   const pieData = {
-    labels: ['Income', 'Expenses'],
+    labels: ['Remaining', 'Spent'],
     datasets: [
       {
-        data: [totalIncome, totalExpenses],
-        backgroundColor: [theme.palette.success.light, theme.palette.error.light],
-        borderColor: [theme.palette.success.main, theme.palette.error.main],
-        borderWidth: 2,
-        hoverBackgroundColor: [theme.palette.success.main, theme.palette.error.main],
+        data: [remainingBalance, totalExpenses],
+        backgroundColor: [theme.palette.primary.main, theme.palette.grey[300]],
+        borderColor: [theme.palette.primary.main, theme.palette.grey[300]],
+        borderWidth: 0,
       },
     ],
   };
 
-  // Prepare data for Bar Chart
+  const pieOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        enabled: false,
+      },
+    },
+    cutout: '75%',
+  };
+
+
   const barData = {
     labels: categoryBreakdown.map(item => item.category),
     datasets: [
@@ -35,23 +65,18 @@ const MonthlyReport = ({ report }) => {
         data: categoryBreakdown.map(item => item.amount),
         backgroundColor: theme.palette.primary.light,
         borderColor: theme.palette.primary.main,
-        borderWidth: 2,
-        hoverBackgroundColor: theme.palette.primary.main,
+        borderWidth: 1,
+        borderRadius: 4,
       },
     ],
   };
 
-  const chartOptions = {
+  const barOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'bottom',
-        labels: {
-          font: {
-            size: isMobile ? 10 : 12,
-          },
-        },
+        display: false,
       },
       title: {
         display: true,
@@ -59,6 +84,20 @@ const MonthlyReport = ({ report }) => {
         font: {
           size: isMobile ? 14 : 18,
           weight: 'bold',
+        },
+        color: theme.palette.text.primary,
+      },
+    },
+    scales: {
+      x: {
+        grid: {
+          display: false,
+        },
+      },
+      y: {
+        beginAtZero: true,
+        grid: {
+          color: theme.palette.divider,
         },
       },
     },
@@ -72,14 +111,18 @@ const MonthlyReport = ({ report }) => {
       <Divider sx={{ mb: 4 }} />
       <Grid container spacing={4}>
         <Grid item xs={12} md={6}>
-          <Box sx={{ height: { xs: 250, sm: 300 }, mb: 3 }}>
-            <Typography variant="h6" gutterBottom align="center" sx={{ fontWeight: 'medium' }}>Income vs Expenses</Typography>
-            <Pie data={pieData} options={chartOptions} />
+          <Box sx={{ height: { xs: 250, sm: 300 }, mb: 3, position: 'relative' }}>
+            <Typography variant="h6" gutterBottom align="center" sx={{ fontWeight: 'medium' }}>Remaining Balance</Typography>
+            <Pie data={pieData} options={pieOptions} />
+            <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
+              <Typography variant="h4" fontWeight="bold" color="primary">${remainingBalance.toFixed(2)}</Typography>
+              <Typography variant="body2" color="text.secondary">Remaining</Typography>
+            </Box>
           </Box>
         </Grid>
         <Grid item xs={12} md={6}>
           <Box sx={{ height: { xs: 250, sm: 300 }, mb: 3 }}>
-            <Bar data={barData} options={chartOptions} />
+            <Bar data={barData} options={barOptions} />
           </Box>
         </Grid>
         <Grid item xs={12} md={6}>
@@ -120,7 +163,7 @@ const MonthlyReport = ({ report }) => {
         <Grid item xs={12} md={6}>
           <Paper elevation={2} sx={{ p: 3, borderRadius: 3, bgcolor: 'background.default', height: '100%' }}>
             <Typography variant="h6" gutterBottom color="primary" sx={{ fontWeight: 'bold', mb: 2 }}>Category Breakdown</Typography>
-            <List sx={{ maxHeight: 250, overflow: 'auto' }}>
+            <StyledList sx={{ maxHeight: 250, overflow: 'auto' }}>
               {categoryBreakdown.map((item, index) => (
                 <ListItem key={index} divider={index !== categoryBreakdown.length - 1} sx={{ py: 1 }}>
                   <ListItemText 
@@ -131,7 +174,7 @@ const MonthlyReport = ({ report }) => {
                   />
                 </ListItem>
               ))}
-            </List>
+            </StyledList>
           </Paper>
         </Grid>
       </Grid>

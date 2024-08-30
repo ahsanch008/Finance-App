@@ -9,7 +9,7 @@ const baseTheme = createTheme({
       contrastText: '#ffffff',
     },
     secondary: {
-      main: '#ff006e', // Vivid pink (kept from previous version)
+      main: '#ff006e', // Vivid pink 
       light: '#ff5a9d',
       dark: '#c50057',
       contrastText: '#ffffff',
@@ -27,22 +27,22 @@ const baseTheme = createTheme({
     fontFamily: '"Poppins", "Roboto", "Helvetica", "Arial", sans-serif',
     h1: {
       fontWeight: 700,
-      fontSize: '3.5rem',
+      fontSize: '3.2rem',
       letterSpacing: '-0.01562em',
     },
     h2: {
       fontWeight: 600,
-      fontSize: '3rem',
-      letterSpacing: '-0.00833em',
+      fontSize: '2.8rem',
+      letterSpacig: '-0.00833em',
     },
     h3: {
       fontWeight: 600,
-      fontSize: '2.5rem',
+      fontSize: '2.3rem',
       letterSpacing: '0em',
     },
     h4: {
       fontWeight: 600,
-      fontSize: '2rem',
+      fontSize: '1.8rem',
       letterSpacing: '0.00735em',
     },
     h5: {
@@ -57,17 +57,17 @@ const baseTheme = createTheme({
     },
     subtitle1: {
       fontWeight: 400,
-      fontSize: '1.1rem',
+      fontSize: '1rem',
       letterSpacing: '0.00938em',
     },
     subtitle2: {
       fontWeight: 400,
-      fontSize: '0.9rem',
+      fontSize: '0.85rem',
       letterSpacing: '0.00714em',
     },
     body1: {
       fontWeight: 400,
-      fontSize: '1rem',
+      fontSize: '0.95rem',
       letterSpacing: '0.00938em',
     },
     body2: {
@@ -82,7 +82,7 @@ const baseTheme = createTheme({
     },
   },
   shape: {
-    borderRadius: 16,
+    borderRadius: 14,
   },
   components: {
     MuiButton: {

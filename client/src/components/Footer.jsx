@@ -8,13 +8,9 @@ import LinkedInIcon from '@mui/icons-material/LinkedIn';
 const StyledFooter = styled('footer')(({ theme }) => ({
   backgroundColor: theme.palette.primary.dark,
   color: theme.palette.primary.contrastText,
-  padding: theme.spacing(3, 0),
+  padding: theme.spacing(1, 0),
   marginTop: 'auto',
   width: '100%',
-  position: 'fixed',
-  bottom: 0,
-  left: 0,
-  right: 0,
 }));
 
 const FooterLink = styled(Link)(({ theme }) => ({

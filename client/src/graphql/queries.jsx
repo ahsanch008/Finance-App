@@ -94,7 +94,7 @@ export const GET_BUDGETS = gql`
       id
       category
       limit
-      spent
+      amount
       period
       createdAt
       updatedAt
@@ -108,7 +108,7 @@ export const GET_BUDGET = gql`
       id
       category
       limit
-      spent
+      amount
       period
       createdAt
       updatedAt
@@ -225,7 +225,7 @@ export const GET_DASHBOARD_DATA = gql`
       id
       category
       limit
-      spent
+      amount
     }
     getMonthlyReport(year: $currentYear, month: $currentMonth) {
       month

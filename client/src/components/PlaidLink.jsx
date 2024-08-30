@@ -81,7 +81,7 @@ const PlaidLink = () => {
   const isLinked = Cookies.get('plaidAccessToken');
 
   return (
-    <Paper elevation={3} sx={{ p: 3, maxWidth: 400, margin: 'auto' }}>
+    <Paper elevation={3} sx={{ p: 3, maxWidth: 400, margin: 'auto', mt: 6 }}>
       <Box display="flex" flexDirection="column" alignItems="center">
         <Button 
           onClick={handleOpen} 

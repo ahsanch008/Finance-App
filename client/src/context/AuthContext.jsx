@@ -11,12 +11,11 @@ export const AuthProvider = ({ children }) => {
     const token = Cookies.get('authToken');
     if (token) {
       setIsAuthenticated(true);
-      // You might want to fetch user data here using the token
     }
   }, []);
 
   const login = (token, userData) => {
-    Cookies.set('authToken', token, { expires:1 }); // Set cookie to expire in 7 days
+    Cookies.set('authToken', token, { expires:1 }); 
     setIsAuthenticated(true);
     setUser(userData);
   };
