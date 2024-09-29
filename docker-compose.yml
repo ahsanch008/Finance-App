@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  server:
+    build:
+      context: ./server
+    container_name: graphql-server
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_NAME=${DB_NAME}
+      - JWT_SECRET=${JWT_SECRET}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - PLAID_CLIENT_ID=${PLAID_CLIENT_ID}
+      - PLAID_SECRET=${PLAID_SECRET}
+      - PLAID_ENV=${PLAID_ENV}
+    depends_on:
+      - postgres
+    volumes:
+      - ./server:/app  # For hot-reloading
+      - /app/node_modules  # Avoid local node_modules mismatch
+    networks:
+      - graphql-network  # Added network for consistency
+
+  client:
+    build:
+      context: ./client
+    container_name: graphql-client
+    networks:
+      - graphql-network
+    ports:
+      - '5173:5173'
+    environment:
+      - REACT_APP_API_URL=http://localhost:3000/graphql
+      - VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}
+    depends_on:
+      - server
+    volumes:
+      - ./client:/app  # For hot-reloading
+      - /app/node_modules  # Avoid local node_modules mismatch
+
+  postgres:
+    image: postgres:14-alpine
+    container_name: pg-database
+    networks:
+      - graphql-network
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES : ${DB_USER}
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data:
+
+networks:
+  graphql-network:
+    driver: bridge
